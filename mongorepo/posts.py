@@ -2,7 +2,7 @@ from pymongo import MongoClient
 
 
 class PostsRepo:
-    "Mongo-backed repository"
+    """Mongo-backed repository"""
 
     def __init__(self, url):
         self.client = MongoClient(url)
