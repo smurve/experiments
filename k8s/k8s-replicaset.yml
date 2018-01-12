@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
- name: mongo1-rs
+ name: capsnet-fashion-rs
 spec:
  replicas: 1
  selector:
   matchLabels:
-   app: mongo1
+   app: capsnet-fashion
  template:
   metadata:
    labels:
-    app: mongo1
+    app: capsnet-fashion
   spec:
    securityContext:
     # the group id of the owner of the actual directory behind the volume
@@ -18,15 +18,10 @@ spec:
     # A better way would've been to have an appropriate ownership on the mounted dir, I guess...?
     supplementalGroups: [1000] 
    containers:
-   - name: mongo-ctr
-     image: bitnami/mongodb:latest
+   - name: capsnet-fashion-ctr
+     image: smurve/capsnet-fashion:latest
+     env:
+     - name: MONGO_URL
+       value: mongo1-svc:27017
      ports:
-     - containerPort: 27017
-     volumeMounts:
-     # name must match the volume name below
-      - name: mongo1
-        mountPath: "/data/db"
-   volumes:
-   - name: mongo1
-     persistentVolumeClaim:
-      claimName: mongo1
+     - containerPort: 5000
