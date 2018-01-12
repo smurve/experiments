@@ -1,8 +1,9 @@
 from app import app
 from mongorepo import posts
+import json
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return posts.find_one()
+    return json.dumps(posts.find_one({}))

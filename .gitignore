@@ -1,5 +1,6 @@
 __pycache__ 
 .idea 
-venv 
+ivenv
 static
 capsnet-fashion.iml
+.ipynb_checkpoints
