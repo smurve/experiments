@@ -7,7 +7,7 @@ pipeline {
   stages {
     stage('identify') {
       steps {
-        sh 'whoami'
+        sh 'id'
       }
     }
     stage('locate') {
