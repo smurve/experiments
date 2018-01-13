@@ -13,7 +13,7 @@ sleep 2
 res=$(curl localhost:$port | grep 'Author')
 echo "result was '$res'" 
 [ "$res" != "" ] || echo Failure!! 
-[ "$res" != "" ] && echo Sucess!!
+[ "$res" != "" ] && echo Success!!
 
 echo done testing. Stopping container
 docker stop $c
