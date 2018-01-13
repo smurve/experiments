@@ -5,13 +5,9 @@ pipeline {
     }
   }
   stages {
-    stage('identify') {
+    stage('identify and locate') {
       steps {
         sh 'id'
-      }
-    }
-    stage('locate') {
-      steps {
         sh 'uname -a'
       }
     }
