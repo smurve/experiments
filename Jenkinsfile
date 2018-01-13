@@ -5,6 +5,8 @@ pipeline {
       steps {
         sh 'id'
         sh 'uname -a'
+        sh 'pwd'
+        sh 'ls'
       }
     }
     stage('hello') {
