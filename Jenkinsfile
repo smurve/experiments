@@ -10,11 +10,13 @@ pipeline {
       }
     }
     stage('build') {
-      withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-        // available as an env variable, but will be masked if you try to print it out any which way
-        sh 'echo $PASSWORD'
-      // also available as a Groovy variable—note double quotes for string interpolation
-        echo "$USERNAME"
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          // available as an env variable, but will be masked if you try to print it out any which way
+          sh 'echo $PASSWORD'
+          // also available as a Groovy variable—note double quotes for string interpolation
+          echo "$USERNAME"
+        }
       } 
     }
     stage('hello') {
