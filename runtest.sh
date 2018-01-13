@@ -5,6 +5,8 @@ echo done. Getting container id.
 c=$(docker ps | grep "smurve/capsnet-fashion:test" | awk '{print $1}')
 echo done: $c. Getting port
 port=$(docker inspect --format "{{.NetworkSettings.Ports}}" $c | awk '{print $2}' | cut -d "}" -f1)
+echo waiting 5s
+sleep 5
 echo done: $port. Curling
 res=$(curl localhost:$port | grep 'Author')
 [ "$res" != "" ] || echo Failed. Result: $res 
