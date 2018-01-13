@@ -7,9 +7,7 @@ pipeline {
   stages {
     stage('test') {
       steps {
-        uname -a
-        whoami
-        echo 'Hello from within the container (hopefully...)'
+        echo 'Hello from $(uname -a)'
       }
     }
   }
