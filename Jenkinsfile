@@ -5,10 +5,18 @@ pipeline {
     }
   }
   stages {
-    stage('test') {
+    stage('identify') {
+      steps {
+        sh 'whoami'
+      }
+    }
+    stage('locate') {
       steps {
         sh 'uname -a'
-        sh 'whoami'
+      }
+    }
+    stage('hello') {
+      steps {
         echo 'Hello from within the container (hopefully...)'
       }
     }
