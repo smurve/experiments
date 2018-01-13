@@ -18,6 +18,11 @@ pipeline {
         }
       } 
     }
+    stage('test') {
+      steps {
+        sh './runtest.sh'
+      }
+    }
     stage('hello') {
       steps {
         echo 'Hello from within the container (hopefully...)'
