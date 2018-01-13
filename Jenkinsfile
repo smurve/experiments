@@ -14,7 +14,7 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
           sh 'docker build -t smurve/capsnet-fashion:test .'
           sh 'docker login --password $PASSWORD --username $USERNAME'
-          sh 'docker push'
+          sh 'docker push smurve/capsnet-fashion:test'
         }
       } 
     }
