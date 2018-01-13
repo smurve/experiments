@@ -25,3 +25,6 @@ spec:
        value: mongo1-svc:27017
      ports:
      - containerPort: 5000
+   nodeSelector:
+    capability: gpu
+
