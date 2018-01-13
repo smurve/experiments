@@ -1,6 +1,6 @@
 #!/bin/bash
 echo starting container
-sh 'docker run -d -p5000 -e MONGO_URL=mongodb://scylla:30017 smurve/capsnet-fashion:test'
+docker run -d -p5000 -e MONGO_URL=mongodb://scylla:30017 smurve/capsnet-fashion:test
 echo done. Getting container id.
 c=$(docker ps | grep "smurve/capsnet-fashion:test" | awk '{print $1}')
 echo done: $c. Getting port
