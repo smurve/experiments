@@ -12,8 +12,7 @@ pipeline {
     stage('build') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-
-          sh 'docker build -t smurve/capsnet-fashion:test .
+          sh 'docker build -t smurve/capsnet-fashion:test .'
           sh 'docker login --password $PASSWORD --username $USERNAME'
           sh 'docker push'
         }
