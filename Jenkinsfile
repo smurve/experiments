@@ -1,9 +1,5 @@
 pipeline {
-  agent {
-    docker {
-        image 'ubuntu:16.04'
-    }
-  }
+  agent {label 'GTX1080'}
   stages {
     stage('identify and locate') {
       steps {
