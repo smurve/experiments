@@ -1,19 +1,22 @@
 pipeline {
-  agent {
-    docker {
-        image 'ubuntu:16.04'
-    }
-  }
+  agent {label 'GTX1080'}
   stages {
-    stage('identify') {
+    stage('identify and locate') {
       steps {
         sh 'id'
+        sh 'uname -a'
+        sh 'pwd'
+        sh 'ls'
       }
     }
-    stage('locate') {
+    stage('build') {
       steps {
-        sh 'uname -a'
-      }
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          sh 'docker build -t smurve/capsnet-fashion:test .'
+          sh 'docker login --password $PASSWORD --username $USERNAME'
+          sh 'docker push smurve/capsnet-fashion:test'
+        }
+      } 
     }
     stage('hello') {
       steps {
