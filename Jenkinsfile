@@ -11,7 +11,7 @@ pipeline {
     }
     stage('virtualenv') {
       steps {
-        sh 'source init_env.sh venv'
+        sh '. ./init_env.sh venv'
       }
     }
     stage('unit test') {
