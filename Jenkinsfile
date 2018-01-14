@@ -11,6 +11,7 @@ pipeline {
     }
     stage('unit test') {
       steps {
+        sh 'rm -rf venv'
         sh '. ./init_env.sh && pytest'
       }
     }
