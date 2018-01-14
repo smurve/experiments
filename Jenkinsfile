@@ -9,14 +9,9 @@ pipeline {
         sh 'ls'
       }
     }
-    stage('virtualenv') {
-      steps {
-        sh '. ./init_env.sh'
-      }
-    }
     stage('unit test') {
       steps {
-        sh 'pytest'
+        sh '. ./init_env.sh && pytest'
       }
     }
     stage('build') {
