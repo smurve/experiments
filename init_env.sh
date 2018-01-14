@@ -24,7 +24,7 @@ then
  echo "===================================================="
  echo activating virtual environment
  echo "===================================================="
- source ${envdir}/bin/activate
+ . ./${envdir}/bin/activate
 
  echo
  echo "===================================================="
