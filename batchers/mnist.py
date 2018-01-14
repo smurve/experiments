@@ -12,6 +12,8 @@ class MnistBatcher:
         self.IMAGE_SIZE = 28
         self.PIXEL_DEPTH = 255
         self.filename = filename
+        self.num_images = num_images
+        self.current_image = 0
         self.data = self.extract_data(filename, num_images)
 
     def extract_data(self, filename, num_images):
@@ -23,3 +25,15 @@ class MnistBatcher:
             data = (data - (self.PIXEL_DEPTH / 2.0)) / self.PIXEL_DEPTH
             data = data.reshape(num_images, self.IMAGE_SIZE, self.IMAGE_SIZE, 1)
             return data
+
+    def next_batch(self, batch_size):
+        last_index = min(self.num_images, self.current_image + batch_size)
+        batch = self.data[self.current_image:last_index, :, :, 0]
+        self.current_image = last_index
+        return batch
+
+    def has_more(self):
+        return self.current_image < self.num_images
+
+    def reset(self):
+        self.current_image = 0
