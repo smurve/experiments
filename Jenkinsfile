@@ -9,6 +9,16 @@ pipeline {
         sh 'ls'
       }
     }
+    stage('virtualenv') {
+      steps {
+        sh 'source init_env.sh venv'
+      }
+    }
+    stage('unit test') {
+      steps {
+        sh 'pytest'
+      }
+    }
     stage('build') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -18,7 +28,7 @@ pipeline {
         }
       } 
     }
-    stage('test') {
+    stage('system test') {
       steps {
         sh './runtest.sh'
       }
