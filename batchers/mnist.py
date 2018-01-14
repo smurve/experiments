@@ -1,4 +1,5 @@
-import gzip, binascii, struct, numpy
+import gzip
+import numpy
 
 
 class MnistBatcher:
