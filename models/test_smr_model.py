@@ -8,7 +8,7 @@ import numpy as np
 class TestModel:
 
     SEED = 123
-    MODEL_FILE = os.environ["TMPDIR"]+"model.cpkt"
+    MODEL_FILE = os.environ.get("TMPDIR", "./")+"/model.cpkt"
     SCOPE = "mnist_softmax_regression"
     img_fiile = './testdata/t10k-images-idx3-ubyte.gz'
     lbl_file = './testdata/t10k-labels-idx1-ubyte.gz'
