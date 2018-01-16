@@ -8,32 +8,41 @@ class MnistBatcher:
     A mini-batch provider for MNIST Images
     """
 
-    def __init__(self, filename, num_images):
+    def __init__(self, img_file, lbl_file, num_samples):
         self.IMAGE_SIZE = 28
         self.PIXEL_DEPTH = 255
-        self.filename = filename
-        self.num_images = num_images
+        self.img_file = img_file
+        self.lbl_file = lbl_file
+        self.num_samples = num_samples
         self.current_image = 0
-        self.data = self.extract_data(filename, num_images)
+        (self.imgs, self.lbls) = self.extract_data()
 
-    def extract_data(self, filename, num_images):
-        with gzip.open(filename) as bytestream:
+    def extract_data(self):
+        with gzip.open(self.img_file) as bytestream:
             bytestream.read(16)
 
-            buf = bytestream.read(self.IMAGE_SIZE * self.IMAGE_SIZE * num_images)
-            data = numpy.frombuffer(buf, dtype=numpy.uint8).astype(numpy.float32)
-            data = (data - (self.PIXEL_DEPTH / 2.0)) / self.PIXEL_DEPTH
-            data = data.reshape(num_images, self.IMAGE_SIZE, self.IMAGE_SIZE, 1)
-            return data
+            buf = bytestream.read(self.IMAGE_SIZE * self.IMAGE_SIZE * self.num_samples)
+            imgs = numpy.frombuffer(buf, dtype=numpy.uint8).astype(numpy.float32)
+            imgs = (imgs - (self.PIXEL_DEPTH / 2.0)) / self.PIXEL_DEPTH
+            imgs = imgs.reshape(self.num_samples, self.IMAGE_SIZE, self.IMAGE_SIZE, 1)
+
+        with gzip.open(self.lbl_file) as bytestream:
+            bytestream.read(8)
+
+            buf = bytestream.read(self.IMAGE_SIZE * self.IMAGE_SIZE * self.num_samples)
+            lbls = numpy.frombuffer(buf, dtype=numpy.uint8).astype(numpy.float32)
+
+        return imgs, lbls
 
     def next_batch(self, batch_size):
-        last_index = min(self.num_images, self.current_image + batch_size)
-        batch = self.data[self.current_image:last_index, :, :, 0]
+        last_index = min(self.num_samples, self.current_image + batch_size)
+        imgs = self.imgs[self.current_image:last_index, :, :, 0]
+        lbls = self.lbls[self.current_image:last_index]
         self.current_image = last_index
-        return batch
+        return imgs, lbls
 
     def has_more(self):
-        return self.current_image < self.num_images
+        return self.current_image < self.num_samples
 
     def reset(self):
         self.current_image = 0
