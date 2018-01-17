@@ -1,0 +1,16 @@
+FROM ubuntu:16.04
+MAINTAINER Wolfgang Giersche
+RUN apt-get update
+RUN apt-get install -y python3
+RUN apt-get install -y python3-pip
+RUN pip3 install --upgrade pip
+RUN pip3 install pymongo tensorflow
+RUN mkdir /source
+WORKDIR /source
+RUN mkdir /source/models
+RUN mkdir /source/batchers
+ADD models /source/models
+ADD batchers /source/batchers
+ADD model_trainer.py logging.conf /source/
+CMD python3 model_trainer.py
+
