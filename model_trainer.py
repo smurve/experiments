@@ -8,11 +8,9 @@ import os
 import time
 
 
-SEED = 123
-SCOPE = "mnist_softmax_regression"
 DATA_DIR = "/var/ellie/data/mnist"
 MODEL_DIR = "/var/ellie/models/mnist"
-MODEL_FILE = os.path.join(MODEL_DIR, "model.cpkt")
+MODEL_FILE = os.path.join(MODEL_DIR, "model.ckpt")
 img_train = os.path.join(DATA_DIR, "train-images-idx3-ubyte.gz")
 lbl_train = os.path.join(DATA_DIR, "train-labels-idx1-ubyte.gz")
 img_test = os.path.join(DATA_DIR, "t10k-images-idx3-ubyte.gz")
@@ -22,6 +20,8 @@ test_batcher = MnistBatcher(img_file=img_test, lbl_file=lbl_test, num_samples=10
 NUM_EPOCHS = 50
 BATCH_SIZE = 2000
 TEST_BATCH_SIZE = 1000
+SEED = 123
+SCOPE = "mnist_softmax_regression"
 spec = [
     {"name": "input", "in": 784, "out": 1024, "activation": tf.nn.relu},
     {"name": "hidden1", "in": 1024, "out": 128, "activation": tf.nn.relu},
@@ -57,7 +57,7 @@ with tf.Session(config=config) as sess:
         test_writer.add_summary(summary, i)
         duration = millies()-now
         if epoch > 0:
-            print("Epoch %s took %sms. Acuracy now: %s" % (epoch, duration, accuracy))
+            print("Epoch %s took %sms. Accuracy now: %s" % (epoch, duration, accuracy))
         now = millies()
 
         train_batcher.reset()
