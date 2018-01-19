@@ -5,6 +5,7 @@ from models.model import TensorflowDenseNet
 from batchers import MnistBatcher
 import tensorflow as tf
 import os
+import time
 
 
 SEED = 123
@@ -28,6 +29,11 @@ spec = [
 
 model = TensorflowDenseNet(SCOPE, SEED, spec)
 
+
+def millies():
+    return int(round(time.time() * 1000))
+
+
 config = tf.ConfigProto(
     log_device_placement=False,
     device_count={'CPU': 12},
@@ -40,6 +46,7 @@ with tf.Session(config=config) as sess:
     test_writer = tf.summary.FileWriter("./test")
     train_step = tf.train.AdamOptimizer().minimize(model.objective)
     sess.run(tf.global_variables_initializer())
+    now = millies()
     for epoch in range(NUM_EPOCHS):
         test_batcher.reset()
 
@@ -48,7 +55,10 @@ with tf.Session(config=config) as sess:
         accuracy, summary = sess.run([model.accuracy, model.summary],
                                      feed_dict={model.samples: samples, model.labels: labels})
         test_writer.add_summary(summary, i)
-        print("Test Accuracy after batch %s: %s" % (i, accuracy))
+        duration = millies()-now
+        if epoch > 0:
+            print("Epoch %s took %sms. Acuracy now: %s" % (epoch, duration, accuracy))
+        now = millies()
 
         train_batcher.reset()
         while train_batcher.has_more():
