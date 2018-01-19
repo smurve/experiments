@@ -15,7 +15,22 @@ pipeline {
         sh '. ./init_env.sh && pytest'
       }
     }
-    stage('build') {
+    stage('build trainer') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          sh 'docker build -t smurve/capsnet-fashion-trainer:latest .'
+          sh 'docker login --password $PASSWORD --username $USERNAME'
+          sh 'docker push smurve/capsnet-fashion-trainer:latest'
+        }
+      }
+    }
+    stage('start trainer job') {
+      steps {
+         'sh ./start_training_job.sh'
+        }
+      }
+    }
+    stage('build inference') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
           sh 'docker build -t smurve/capsnet-fashion:test .'
