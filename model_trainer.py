@@ -42,8 +42,8 @@ config = tf.ConfigProto(
 
 with tf.Session(config=config) as sess:
     i = 0
-    train_writer = tf.summary.FileWriter("./train", sess.graph)
-    test_writer = tf.summary.FileWriter("./test")
+    train_writer = tf.summary.FileWriter(os.path.join(MODEL_DIR, "train"), sess.graph)
+    test_writer = tf.summary.FileWriter(os.path.join(MODEL_DIR, "./test"))
     train_step = tf.train.AdamOptimizer().minimize(model.objective)
     sess.run(tf.global_variables_initializer())
     now = millies()
