@@ -1,8 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from models.model import TensorflowSoftmaxRegression
-# from models.model import TensorflowHiddenx2Feedforward
+from models.model import TensorflowDenseNet
 from batchers import MnistBatcher
 import tensorflow as tf
 import os
@@ -19,13 +18,23 @@ img_test = os.path.join(DATA_DIR, "t10k-images-idx3-ubyte.gz")
 lbl_test = os.path.join(DATA_DIR, "t10k-labels-idx1-ubyte.gz")
 train_batcher = MnistBatcher(img_file=img_train, lbl_file=lbl_train, num_samples=60000)
 test_batcher = MnistBatcher(img_file=img_test, lbl_file=lbl_test, num_samples=10000)
-NUM_EPOCHS = 200
-BATCH_SIZE = 256
+NUM_EPOCHS = 50
+BATCH_SIZE = 2000
 TEST_BATCH_SIZE = 1000
-model = TensorflowSoftmaxRegression(SCOPE, SEED, 784, 10, precision=tf.float32)
-# model = TensorflowHiddenx2Feedforward(SCOPE, SEED)
+spec = [
+    {"name": "input", "in": 784, "out": 1024, "activation": tf.nn.relu},
+    {"name": "hidden1", "in": 1024, "out": 128, "activation": tf.nn.relu},
+    {"name": "hidden2", "in": 128, "out": 10, "activation": tf.nn.softmax}]
 
-with tf.Session(config=tf.ConfigProto(log_device_placement=False)) as sess:
+model = TensorflowDenseNet(SCOPE, SEED, spec)
+
+config = tf.ConfigProto(
+    log_device_placement=False,
+    device_count={'CPU': 12},
+    intra_op_parallelism_threads=12,
+    inter_op_parallelism_threads=12)
+
+with tf.Session(config=config) as sess:
     i = 0
     train_writer = tf.summary.FileWriter("./train", sess.graph)
     test_writer = tf.summary.FileWriter("./test")
@@ -34,18 +43,19 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=False)) as sess:
     for epoch in range(NUM_EPOCHS):
         test_batcher.reset()
 
-        images, labels = test_batcher.next_batch(TEST_BATCH_SIZE)
+        samples, labels = test_batcher.next_batch(TEST_BATCH_SIZE)
+        samples = samples.reshape(-1, 784)
         accuracy, summary = sess.run([model.accuracy, model.summary],
-                                     feed_dict={model.images: images.reshape(-1, 784), model.labels: labels})
+                                     feed_dict={model.samples: samples, model.labels: labels})
         test_writer.add_summary(summary, i)
         print("Test Accuracy after batch %s: %s" % (i, accuracy))
 
         train_batcher.reset()
         while train_batcher.has_more():
-            images, labels = train_batcher.next_batch(BATCH_SIZE)
-            images = images.reshape(-1, 784)
+            samples, labels = train_batcher.next_batch(BATCH_SIZE)
+            samples = samples.reshape(-1, 784)
             _, summary = sess.run([train_step, model.summary],
-                                  feed_dict={model.images: images, model.labels: labels})
+                                  feed_dict={model.samples: samples, model.labels: labels})
             train_writer.add_summary(summary, i)
             i += 1
 
