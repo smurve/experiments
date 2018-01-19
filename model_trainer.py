@@ -1,12 +1,14 @@
-# from models.model import TensorflowMnistSoftmaxRegression
-from models.model import TensorflowHiddenx2Feedforward
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from models.model import TensorflowSoftmaxRegression
+# from models.model import TensorflowHiddenx2Feedforward
 from batchers import MnistBatcher
 import tensorflow as tf
 import os
 
 
 SEED = 123
-MODEL_FILE = os.path.join(os.environ.get("TMPDIR", "./"), "model.cpkt")
 SCOPE = "mnist_softmax_regression"
 DATA_DIR = "/var/ellie/data/mnist"
 MODEL_DIR = "/var/ellie/models/mnist"
@@ -17,38 +19,38 @@ img_test = os.path.join(DATA_DIR, "t10k-images-idx3-ubyte.gz")
 lbl_test = os.path.join(DATA_DIR, "t10k-labels-idx1-ubyte.gz")
 train_batcher = MnistBatcher(img_file=img_train, lbl_file=lbl_train, num_samples=60000)
 test_batcher = MnistBatcher(img_file=img_test, lbl_file=lbl_test, num_samples=10000)
-NUM_EPOCHS = 300
+NUM_EPOCHS = 200
 BATCH_SIZE = 256
-# model = TensorflowMnistSoftmaxRegression(SCOPE, SEED)
-model = TensorflowHiddenx2Feedforward(SCOPE, SEED)
+TEST_BATCH_SIZE = 1000
+model = TensorflowSoftmaxRegression(SCOPE, SEED, 784, 10, precision=tf.float32)
+# model = TensorflowHiddenx2Feedforward(SCOPE, SEED)
 
-with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+with tf.Session(config=tf.ConfigProto(log_device_placement=False)) as sess:
+    i = 0
+    train_writer = tf.summary.FileWriter("./train", sess.graph)
+    test_writer = tf.summary.FileWriter("./test")
     train_step = tf.train.AdamOptimizer().minimize(model.objective)
     sess.run(tf.global_variables_initializer())
     for epoch in range(NUM_EPOCHS):
+        test_batcher.reset()
+
+        images, labels = test_batcher.next_batch(TEST_BATCH_SIZE)
+        accuracy, summary = sess.run([model.accuracy, model.summary],
+                                     feed_dict={model.images: images.reshape(-1, 784), model.labels: labels})
+        test_writer.add_summary(summary, i)
+        print("Test Accuracy after batch %s: %s" % (i, accuracy))
+
         train_batcher.reset()
-        if (epoch % 10) == 0:
-            print("Epoch Nr. %s" % (epoch + 1))
-            test_batcher.reset()
-            test_images, test_labels = test_batcher.next_batch(200)
-            test_images = test_images.reshape(-1, 784)
-            test_accuracy = sess.run(model.accuracy,
-                                     feed_dict={model.images: test_images, model.labels: test_labels})
-            test_accuracy = round(test_accuracy * 100, 2)
-            print("Test Accuracy: %s" % test_accuracy)
-
-            train_images, train_labels = train_batcher.next_batch(200)
-            train_images = train_images.reshape(-1, 784)
-            train_accuracy = sess.run(model.accuracy,
-                                      feed_dict={model.images: train_images, model.labels: train_labels})
-            train_accuracy = round(train_accuracy * 100, 2)
-            print("Train Accuracy: %s" % train_accuracy)
-            train_batcher.reset()
-
         while train_batcher.has_more():
             images, labels = train_batcher.next_batch(BATCH_SIZE)
             images = images.reshape(-1, 784)
-            train_step.run(session=sess, feed_dict={model.images: images, model.labels: labels})
+            _, summary = sess.run([train_step, model.summary],
+                                  feed_dict={model.images: images, model.labels: labels})
+            train_writer.add_summary(summary, i)
+            i += 1
 
     saver = tf.train.Saver()
     saver.save(sess, MODEL_FILE)
+
+    train_writer.close()
+    test_writer.close()
