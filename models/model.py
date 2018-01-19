@@ -24,7 +24,7 @@ class TensorflowDenseNet:
                 labels = tf.placeholder(dtype=tf.int32, shape=[None], name="labels")
                 y_ = tf.one_hot(labels, dim_out)
 
-            # construct the sequence of dense layers
+            # construct the stack of dense layers
             l_in = samples
             activation = samples
             for layer in spec:
@@ -36,12 +36,6 @@ class TensorflowDenseNet:
                 l_in = activation
 
             a = activation
-
-            # hidden1 = 512
-            # hidden2 = 128
-            # a1 = self.dense(samples, dim_in, hidden1, seed, "hidden1", tf.nn.relu)
-            # a2 = self.dense(a1, hidden1, hidden2, seed, "hidden2", tf.nn.relu)
-            # a = self.dense(a2, hidden2, dim_out, seed, "output", tf.nn.softmax)
 
             with tf.name_scope("objective"):
                 objective = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=a),
