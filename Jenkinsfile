@@ -26,7 +26,7 @@ pipeline {
     }
     stage('start trainer job') {
       steps {
-        'sh ./start_training_job.sh'
+        sh './start_training_job.sh'
       }
     }
     stage('build inference') {
