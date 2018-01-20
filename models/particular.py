@@ -12,4 +12,6 @@ spec = [
     {"name": "hidden1", "in": 1024, "out": 128, "activation": tf.nn.relu},
     {"name": "hidden2", "in": 128, "out": 10, "activation": tf.nn.softmax}]
 
-dense_4_layers = TensorflowDenseNet(SCOPE, SEED, spec)
+
+def dense_4_layers():
+    return TensorflowDenseNet(SCOPE, SEED, spec)
