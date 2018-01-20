@@ -7,6 +7,7 @@ RUN mkdir /source
 WORKDIR /source
 RUN mkdir /source/app
 ADD app /source/app
+RUN mkdir /source/app/images
 RUN mkdir /source/mongorepo
 ADD mongorepo /source/mongorepo
 RUN mkdir /source/mnist

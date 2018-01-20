@@ -43,5 +43,11 @@ pipeline {
         sh './runtest.sh'
       }
     }
+    stage('deploy inference service') {
+      steps {
+        sh 'kubectl delete -f k8s'
+        sh 'kubectl create -f k8s'
+      }
+    }
   }
 }
