@@ -7,14 +7,28 @@ from models.particular import MODEL_FILE
 from mnist import test_batcher as batcher
 
 
+class FailedPrediction:
+    def __init__(self, idx, file, lbl, pred):
+        self.idx = idx
+        self.file = file
+        self.lbl = lbl
+        self.pred = pred
+
+    def __str__(self):
+        return "[%s] File %s, true: %s - pred: %s" % (self.idx, self.file, self.lbl, self.pred)
+
+
 class MnistPredictionService:
 
-    def __init__(self, img_dir='app/images'):
+    def __init__(self, img_dir='images'):
         self.img_dir = img_dir
 
+    def app_img_dir(self):
+        return os.path.join("app", self.img_dir)
+
     def clean_img_dir(self):
-        for img in os.listdir(self.img_dir):
-            path = os.path.join(self.img_dir, img)
+        for img in os.listdir(self.app_img_dir()):
+            path = os.path.join(self.app_img_dir(), img)
             try:
                 if os.path.isfile(path):
                     os.unlink(path)
@@ -35,17 +49,17 @@ class MnistPredictionService:
             lbls = np.int32(lbls)
             inference = sess.run(model.activation, feed_dict={model.samples: img})
             predicted = np.argmax(inference, axis=1)
-            failed = (1 - np.equal(predicted, lbls)) * range(batch_size)
+            failed = np.multiply((1 - np.equal(predicted, lbls)), range(batch_size))
             failed_indices = [i for i in filter(lambda x: x > 0, failed)]
             failed_records = [{"index": idx, "lbl": lbls[idx], "pred": predicted[idx]}
                               for idx in failed_indices]
             return failed_records
 
     @staticmethod
-    def save_png(img, name):
+    def save_png(img, pngfile):
         img = img.reshape(28, 28)
         img = np.int32((img + 0.5) * 255)
-        with open("%s.png" % name, "wb") as h:
+        with open(pngfile, "wb") as h:
             w = png.Writer(28, 28, greyscale=True)
             w.write(h, img)
 
@@ -58,8 +72,12 @@ class MnistPredictionService:
         batcher.reset()
         imgs, _ = batcher.next_batch(search_size)
         failed_records = self.list_failed(search_size)
+        all_img = []
         for record in failed_records[0:min(max_nr_files, len(failed_records)+1)]:
             index = record["index"]
             img = imgs[index]
-            name = "%s-%s-%s" % (index, record["lbl"], record["pred"])
-            self.save_png(img, os.path.join(self.img_dir, name))
+            name = "%s-%s-%s.png" % (index, record["lbl"], record["pred"])
+            self.save_png(img, os.path.join(self.app_img_dir(), name))
+            name = os.path.join(self.img_dir, name)
+            all_img.append(FailedPrediction(index, name, record["lbl"], record["pred"]))
+        return all_img
