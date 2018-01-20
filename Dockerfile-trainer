@@ -3,9 +3,9 @@ MAINTAINER Wolfgang Giersche
 RUN mkdir /source
 WORKDIR /source
 RUN mkdir /source/models
-RUN mkdir /source/batchers
+RUN mkdir /source/mnist
 ADD models /source/models
-ADD mnist /source/batchers
+ADD mnist /source/mnist
 ADD model_trainer.py logging.conf /source/
 CMD python model_trainer.py
 
