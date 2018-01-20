@@ -1,5 +1,13 @@
 import gzip
 import numpy
+import os
+
+
+DATA_DIR = "/var/ellie/data/mnist"
+img_train = os.path.join(DATA_DIR, "train-images-idx3-ubyte.gz")
+lbl_train = os.path.join(DATA_DIR, "train-labels-idx1-ubyte.gz")
+img_test = os.path.join(DATA_DIR, "t10k-images-idx3-ubyte.gz")
+lbl_test = os.path.join(DATA_DIR, "t10k-labels-idx1-ubyte.gz")
 
 
 class MnistBatcher:
@@ -15,6 +23,7 @@ class MnistBatcher:
         self.lbl_file = lbl_file
         self.num_samples = num_samples
         self.current_image = 0
+        self.preprocessor = None
         (self.imgs, self.lbls) = self.extract_data()
 
     def extract_data(self):
@@ -39,6 +48,8 @@ class MnistBatcher:
         imgs = self.imgs[self.current_image:last_index, :, :, 0]
         lbls = self.lbls[self.current_image:last_index]
         self.current_image = last_index
+        if self.preprocessor is not None:
+            imgs = self.preprocessor(imgs)
         return imgs, lbls
 
     def has_more(self):
@@ -46,3 +57,6 @@ class MnistBatcher:
 
     def reset(self):
         self.current_image = 0
+
+    def set_preprocessor(self, preprocessor):
+        self.preprocessor = preprocessor

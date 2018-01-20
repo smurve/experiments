@@ -7,3 +7,4 @@ capsnet-fashion.iml
 .cache
 /test/
 /train/
+/app/images/

@@ -5,7 +5,7 @@ WORKDIR /source
 RUN mkdir /source/models
 RUN mkdir /source/batchers
 ADD models /source/models
-ADD batchers /source/batchers
+ADD mnist /source/batchers
 ADD model_trainer.py logging.conf /source/
 CMD python model_trainer.py
 

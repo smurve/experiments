@@ -1,5 +1,5 @@
 from .model import TensorflowDenseNet
-from batchers import MnistBatcher
+from mnist.batcher import MnistBatcher
 import tensorflow as tf
 import os
 import numpy as np

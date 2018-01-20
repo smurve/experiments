@@ -1,4 +1,4 @@
-from batchers import MnistBatcher
+from .batcher import MnistBatcher
 
 
 class TestMnistBatcher(object):

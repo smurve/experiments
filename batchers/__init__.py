@@ -1,3 +1,0 @@
-from .mnist import MnistBatcher
-
-
