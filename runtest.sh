@@ -1,15 +1,16 @@
 #!/bin/bash
 echo starting container
 docker run -d -p5000 -e MONGO_URL=mongodb://scylla:30017 -v /var/ellie:/var/ellie smurve/capsnet-fashion:latest
-echo done. 
+echo Done.
+echo Will continue after 10 seconds
+sleep 10
 echo Getting container id.
 c=$(docker ps | grep "smurve/capsnet-fashion:latest" | awk '{print $1}')
-echo done. Container id is ${c}.
+echo Done. Container id is ${c}.
 echo Getting port
 port=$(docker inspect --format "{{.NetworkSettings.Ports}}" ${c} | awk '{print $2}' | cut -d "}" -f1)
-echo done: Port number is ${port}.
-echo curling after 2 seconds
-sleep 2
+echo Done: Port number is ${port}.
+echo Curling the health end point
 res=$(curl localhost:${port}/health | grep 'Status: Healthy')
 echo "result was '$res'" 
 [ "$res" != "" ] || echo Failure!!
