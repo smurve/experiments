@@ -1,10 +1,8 @@
-FROM ubuntu:16.04
+FROM tensorflow/tensorflow:latest-gpu
 MAINTAINER Wolfgang Giersche
 RUN apt-get update
-RUN apt-get install -y python3
-RUN apt-get install -y python3-pip
-RUN pip3 install --upgrade pip
-RUN pip3 install pymongo flask
+RUN pip install --upgrade pip
+RUN pip install pymongo flask pypng
 RUN mkdir /source
 WORKDIR /source
 RUN mkdir /source/app
@@ -19,5 +17,5 @@ RUN mkdir /source/services
 ADD services /source/services
 
 ADD capsnet-fashion.py logging.conf /source/
-CMD python3 capsnet-fashion.py
+CMD python capsnet-fashion.py
 
