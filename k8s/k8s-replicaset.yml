@@ -20,11 +20,19 @@ spec:
    containers:
    - name: capsnet-fashion-ctr
      image: smurve/capsnet-fashion:latest
+     volumeMounts:
+     # name must match the volume name below
+     - name: ellie
+       mountPath: "/var/ellie"
      env:
      - name: MONGO_URL
        value: mongo1-svc:27017
      ports:
      - containerPort: 5000
+   volumes:
+   - name: ellie
+     persistentVolumeClaim:
+      claimName: ellie
    nodeSelector:
     capability: gpu
 
