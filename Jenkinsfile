@@ -45,7 +45,7 @@ pipeline {
     }
     stage('deploy inference service') {
       steps {
-        sh 'kubectl delete -f k8s'
+        sh 'kubectl delete -f k8s || echo Didn't exist. Fine.'
         sh 'kubectl create -f k8s'
       }
     }
