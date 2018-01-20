@@ -39,6 +39,11 @@ def mongo():
     return json.dumps(posts.find_one({}))
 
 
+@app.route('/health')
+def health_check():
+    return render_template('health.html')
+
+
 def load_images():
     print("loading...")
     return mnist_service.create_failed_pngs(10000)
