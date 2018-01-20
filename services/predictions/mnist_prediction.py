@@ -2,8 +2,8 @@ import os
 import png
 import numpy as np
 import tensorflow as tf
-from models.particular import dense_4_layers
-from models.particular import MODEL_FILE
+from models.particular_mnist import dense_4_layers
+from models.particular_mnist import MODEL_FILE
 from mnist import test_batcher as batcher
 
 

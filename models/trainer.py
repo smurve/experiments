@@ -21,7 +21,7 @@ def train(model, train_batcher, test_batcher, config, params):
         i = 0
         train_writer = tf.summary.FileWriter(os.path.join(params.log_dir, "train"), sess.graph)
         test_writer = tf.summary.FileWriter(os.path.join(params.log_dir, "test"))
-        train_step = tf.train.AdamOptimizer().minimize(model.objective)
+        train_step = tf.train.AdamOptimizer(1e-5).minimize(model.objective)
         sess.run(tf.global_variables_initializer())
         now = millies()
         for epoch in range(params.num_epochs):
