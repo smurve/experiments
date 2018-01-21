@@ -1,11 +1,11 @@
 #!/bin/bash
 echo starting container
-docker run -d -p5000 -e MONGO_URL=mongodb://scylla:30017 -v /var/ellie:/var/ellie smurve/capsnet-fashion:latest
+docker run -d -p5000 -e MONGO_URL=mongodb://scylla:30017 -v /var/ellie:/var/ellie smurve/ellie_inference_webapp:latest
 echo Done.
 echo Will continue after 10 seconds
 sleep 10
 echo Getting container id.
-c=$(docker ps | grep "smurve/capsnet-fashion:latest" | awk '{print $1}')
+c=$(docker ps | grep "smurve/ellie_inference_webapp:latest" | awk '{print $1}')
 echo Done. Container id is ${c}.
 echo Getting port
 port=$(docker inspect --format "{{.NetworkSettings.Ports}}" ${c} | awk '{print $2}' | cut -d "}" -f1)
