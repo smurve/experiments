@@ -10,70 +10,78 @@ echo
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
- echo "Usage: source init_env [-g|--use-gpu] [env]"
- echo
- echo env: Name of the environment folder, defaults to venv
+    echo "Usage: source init_env [-g|--use-gpu] [env]"
+    echo
+    echo env: Name of the environment folder, defaults to venv
 else # this is intended. Can't use exit, since this file is supposed to be sourced. Will close at the very end of the script
+
 
 usegpu=false
 if [ "$1" = "-g" ] || [ "$1" = "--use-gpu" ]
 then
- usegpu=true
- shift
+    usegpu=true
+    shift
 fi
 
+
+#
+# If you didn't specify the environment name, we will always create a fresh environment
+#
 if [ "$1" = "" ]
 then
- envdir=venv
+    envdir=venv
+    echo "Using default environment directory venv. Will overwrite if it exists."
+    rm -rf venv
+    create_envdir=true
+
 else
- envdir=$1
+    envdir=$1
+
+    echo Creating your virtual environment in ${envdir}
+
+    if [ -d "$envdir" ]
+    then
+        echo "overwrite existing ${envdir}? (Yy/n)"
+        read doit
+        if [ "${doit}" = "y" ] || [ "${doit}" = "Y" ]
+        then
+            rm -rf "$envdir"
+            create_envdir=true
+        fi
+    fi
 fi
-
-echo Creating your virtual environment in ${envdir}
-
-if [ -d "$envdir" ]
-then
- echo "overwrite existing ${envdir}? (Yy/n)"
- read doit
- if [ "${doit}" = "y" ] || [ "${doit}" = "Y" ]
- then
-  rm -rf "$envdir"
-  create_envdir=true
- fi
-fi
-
 
 if [ "${create_envdir}" = "true" ]
 then
- virtualenv --python=${PY} ${envdir}
- . ./${envdir}/bin/activate
- echo
- echo "========================================================================================================"
- echo installing packages
- echo "========================================================================================================"
- if [ "${usegpu}" = "true" ]
- then
-  echo "========================================================================================================"
-  echo installing tensorflow with GPU support. This requires cuda version 9.0+ installed.
-  echo "========================================================================================================"
-  ${PY} -m pip install tensorflow-gpu==1.4.1
- else
-  echo "========================================================================================================"
-  echo installing tensorflow with CPU support only
-  echo "========================================================================================================"
-  ${PY} -m pip install tensorflow==1.4.1
- fi
- for pkg in $(cat ./shell/package.versions)
- do
-   ${PY} -m pip install ${pkg}
- done
+    virtualenv --python=${PY} ${envdir}
+    . ./${envdir}/bin/activate
+    echo
+    echo "========================================================================================================"
+    echo installing packages
+    echo "========================================================================================================"
+    if [ "${usegpu}" = "true" ]
+    then
+        echo "========================================================================================================"
+        echo installing tensorflow with GPU support. This requires cuda version 9.0+ installed.
+        echo "========================================================================================================"
+        ${PY} -m pip install tensorflow-gpu==1.4.1
+    else
+        echo "========================================================================================================"
+        echo installing tensorflow with CPU support only
+        echo "========================================================================================================"
+        ${PY} -m pip install tensorflow==1.4.1
+    fi
+    for pkg in $(cat ./shell/package.versions)
+    do
+        ${PY} -m pip install ${pkg}
+    done
 
 else
- echo
- echo "========================================================================================================"
- echo activating virtual environment
- echo "========================================================================================================"
- . ./${envdir}/bin/activate
+    echo
+    echo "========================================================================================================"
+    echo activating virtual environment
+    echo "========================================================================================================"
+    . ./${envdir}/bin/activate
 fi
 
 export PATH=$PATH:${PWD}/shell
