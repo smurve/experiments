@@ -19,7 +19,7 @@ spec:
     supplementalGroups: [1000] 
    containers:
    - name: capsnet-fashion-ctr
-     image: smurve/capsnet-fashion:latest
+     image: smurve/ellie_inference_webapp:latest
      volumeMounts:
      # name must match the volume name below
      - name: ellie

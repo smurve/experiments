@@ -12,7 +12,7 @@ spec:
     supplementalGroups: [1000]
    containers:
    - name: capsnet-fashion-trainer
-     image: smurve/capsnet-fashion-trainer:latest
+     image: smurve/capsnet-fashion-trainer:latest-gpu
      volumeMounts:
      # name must match the volume name below
      - name: ellie

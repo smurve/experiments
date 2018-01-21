@@ -18,23 +18,23 @@ pipeline {
     stage('build trainer') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'docker build -t smurve/capsnet-fashion-trainer:latest -f Dockerfile-mnist-trainer-gpu .'
+          sh 'docker build -t smurve/capsnet-fashion-trainer:latest-gpu -f Dockerfile-mnist-trainer-gpu .'
           sh 'docker login --password $PASSWORD --username $USERNAME'
-          sh 'docker push smurve/capsnet-fashion-trainer:latest'
+          sh 'docker push smurve/capsnet-fashion-trainer:latest-gpu'
         }
       }
     }
     stage('start trainer job') {
       steps {
-        sh './start_training_job.sh'
+        sh './shell/start_training_job.sh'
       }
     }
     stage('build inference') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'docker build -t smurve/capsnet-fashion:latest .'
+          sh 'docker build -t smurve/ellie_inference_webapp:latest .'
           sh 'docker login --password $PASSWORD --username $USERNAME'
-          sh 'docker push smurve/capsnet-fashion:latest'
+          sh 'docker push smurve/ellie_inference_webapp:latest'
         }
       } 
     }
