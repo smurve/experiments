@@ -22,8 +22,9 @@ class MnistPredictionService:
 
     def __init__(self, img_dir='images'):
         self.img_dir = img_dir
-        if not os.path.isdir(self.app_img_dir()):
-            os.mkdir("images")
+        app_img = self.app_img_dir()
+        if not os.path.isdir(app_img):
+            os.mkdir(app_img)
 
     def app_img_dir(self):
         return os.path.join("app", self.img_dir)
