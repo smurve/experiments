@@ -38,7 +38,7 @@ pipeline {
         }
       } 
     }
-    stage('system test') {
+    stage('inference health check') {
       steps {
         sh './shell/run_webapp_health.sh'
       }
