@@ -32,7 +32,7 @@ pipeline {
     stage('build inference') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'docker build -t smurve/ellie_inference_webapp:latest .'
+          sh 'docker build -t smurve/ellie_inference_webapp:latest -f Dockerfile-inference-webapp .'
           sh 'docker login --password $PASSWORD --username $USERNAME'
           sh 'docker push smurve/ellie_inference_webapp:latest'
         }
