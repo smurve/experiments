@@ -10,8 +10,8 @@ class TestModel:
     SEED = 123
     MODEL_FILE = os.path.join(os.environ.get("TMPDIR", "./"), "model.cpkt")
     SCOPE = "mnist_softmax_regression"
-    img_fiile = './testdata/t10k-images-idx3-ubyte.gz'
-    lbl_file = './testdata/t10k-labels-idx1-ubyte.gz'
+    img_fiile = '../testdata/t10k-images-idx3-ubyte.gz'
+    lbl_file = '../testdata/t10k-labels-idx1-ubyte.gz'
     batcher = MnistBatcher(img_file=img_fiile, lbl_file=lbl_file, num_samples=30)
 
     spec = [{"name": "single_layer", "in": 784, "out": 10, "activation": tf.nn.softmax}]

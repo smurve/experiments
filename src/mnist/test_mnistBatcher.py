@@ -3,8 +3,8 @@ from .batcher import MnistBatcher
 
 class TestMnistBatcher(object):
 
-    IMG_FILE = './testdata/t10k-images-idx3-ubyte.gz'
-    LBL_FILE = './testdata/t10k-labels-idx1-ubyte.gz'
+    IMG_FILE = '../testdata/t10k-images-idx3-ubyte.gz'
+    LBL_FILE = '../testdata/t10k-labels-idx1-ubyte.gz'
 
     def test_extract_data(self):
         b = MnistBatcher(img_file=self.IMG_FILE, lbl_file=self.LBL_FILE, num_samples=30)

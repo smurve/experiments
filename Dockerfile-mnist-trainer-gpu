@@ -1,0 +1,6 @@
+FROM tensorflow/tensorflow:latest-gpu
+MAINTAINER Wolfgang Giersche
+ADD src /src
+WORKDIR /src/
+CMD python mnist_trainer.py
+

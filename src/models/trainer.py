@@ -8,12 +8,13 @@ def millies():
 
 
 class Params:
-    def __init__(self, num_epochs, batch_size, test_batch_size, model_file, log_dir):
+    def __init__(self, num_epochs, batch_size, test_batch_size, model_file, log_dir, learning_rate=1e-3):
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size
         self.model_file = model_file
         self.log_dir = log_dir
+        self.learning_rate = learning_rate
 
 
 def train(model, train_batcher, test_batcher, config, params):
@@ -21,7 +22,7 @@ def train(model, train_batcher, test_batcher, config, params):
         i = 0
         train_writer = tf.summary.FileWriter(os.path.join(params.log_dir, "train"), sess.graph)
         test_writer = tf.summary.FileWriter(os.path.join(params.log_dir, "test"))
-        train_step = tf.train.AdamOptimizer(1e-5).minimize(model.objective)
+        train_step = tf.train.AdamOptimizer(params.learning_rate).minimize(model.objective)
         sess.run(tf.global_variables_initializer())
         now = millies()
         for epoch in range(params.num_epochs):
