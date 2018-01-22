@@ -8,7 +8,7 @@
 #
 
 python cifar10_distr.py \
-    --ps_hosts=scylla:2222,charybdis:2222 \
+    --ps_hosts=charybdis:2222 \
     --worker_hosts=scylla:2223,charybdis:2223 \
     --job_name=$1 --task_index=$2
 
