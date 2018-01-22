@@ -25,14 +25,14 @@ def clean_tensorboard_logs(logdir):
 
 config = tf.ConfigProto(
     log_device_placement=False,
-    device_count={'CPU': 12},
+    device_count={'GPU': 2},
     intra_op_parallelism_threads=12,
     inter_op_parallelism_threads=12)
 
 LOGDIR = "/var/ellie/models/mnist"
 
-params = Params(num_epochs=20,
-                batch_size=1000,
+params = Params(num_epochs=100,
+                batch_size=10000,
                 test_batch_size=1000,
                 model_file=MODEL_FILE,
                 log_dir=LOGDIR)
