@@ -24,7 +24,7 @@ LOGDIR = "/var/ellie/logs"
 
 
 params = Params(num_epochs=25,
-                batch_size=1000,
+                batch_size=20000,
                 test_batch_size=1000,
                 model_file=MODEL_FILE,
                 log_dir=LOGDIR)
