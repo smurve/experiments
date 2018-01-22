@@ -20,7 +20,7 @@ def millies():
     return int(round(time.time() * 1000))
 
 
-LOGDIR = "/Users/wgiersche/log"
+LOGDIR = "/var/ellie/logs"
 
 
 params = Params(num_epochs=25,
