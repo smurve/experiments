@@ -17,7 +17,7 @@ class ExamplesPerSecondHook(session_run_hook.SessionRunHook):
             self,
             batch_size,
             every_n_steps=100,
-            every_n_secs=None, ):
+            every_n_secs=None):
         """Initializer for ExamplesPerSecondHook.
 
           Args:
@@ -35,9 +35,9 @@ class ExamplesPerSecondHook(session_run_hook.SessionRunHook):
         self._step_train_time = 0
         self._total_steps = 0
         self._batch_size = batch_size,
-        self._global_step_tensor = None
 
     def begin(self):
+        # noinspection PyAttributeOutsideInit
         self._global_step_tensor = training_util.get_global_step()
         if self._global_step_tensor is None:
             raise RuntimeError(
