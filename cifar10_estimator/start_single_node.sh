@@ -9,3 +9,4 @@ python cifar10_main.py \
     --num-gpus=2 \
     --sync \
     "$@"
+
