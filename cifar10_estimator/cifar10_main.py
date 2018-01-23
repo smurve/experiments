@@ -36,6 +36,7 @@ import os
 import cifar10
 import cifar10_model
 import cifar10_utils
+import reporting_utils
 import numpy as np
 import six
 import tensorflow as tf
@@ -43,11 +44,17 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def get_model_fn(num_gpus, variable_strategy, num_workers):
-    """Returns a function that will build the resnet model."""
+def get_model_fn(num_gpus, variable_strategy, lr_provider):
+    """Returns a function that will build the resnet model.
+    Args:
+        num_gpus: number of GPUs to use (obviously)
+        variable_strategy: "GPU" or "CPU"
+        lr_provider: a function that takes a tf.train.get_global_step() and returns
+        a learning rate value for that step
+    """
 
-    def _resnet_model_fn(features, labels, mode, params):
-        """Resnet model body.
+    def _multi_tower_model_fn(features, labels, mode, params):
+        """A model function that distributes models amongst towers.
 
         Support single host, one or more GPU training. Parameter distribution can
         be either one of the following scheme.
@@ -149,29 +156,11 @@ def get_model_fn(num_gpus, variable_strategy, num_workers):
         consolidation_device = '/gpu:0' if variable_strategy == 'GPU' else '/cpu:0'
         with tf.device(consolidation_device):
 
-
-            #
-            # To make this method model-agnostic,
-            # try to pass the learning rate from outside
-            #
-            # Suggested learning rate scheduling from
-            # https://github.com/ppwwyyxx/tensorpack/blob/master/examples/ResNet/cifar10-resnet.py#L155
-            num_batches_per_epoch = cifar10.Cifar10DataSet.num_examples_per_epoch(
-                'train') // (params.train_batch_size * num_workers)
-
-            boundaries = [
-                num_batches_per_epoch * x
-                for x in np.array([82, 123, 300], dtype=np.int64)
-            ]
-            staged_lr = [params.learning_rate * x for x in [1, 0.1, 0.01, 0.002]]
-
-            learning_rate = tf.train.piecewise_constant(tf.train.get_global_step(),
-                                                        boundaries, staged_lr)
-
+            learning_rate = lr_provider(tf.train.get_global_step())
 
             loss = tf.reduce_mean(tower_losses, name='loss')
 
-            examples_sec_hook = cifar10_utils.ExamplesPerSecondHook(
+            examples_sec_hook = reporting_utils.ExamplesPerSecondHook(
                 params.train_batch_size, every_n_steps=10)
 
             tensors_to_log = {'learning_rate': learning_rate, 'loss': loss}
@@ -219,7 +208,7 @@ def get_model_fn(num_gpus, variable_strategy, num_workers):
             training_hooks=train_hooks,
             eval_metric_ops=metrics)
 
-    return _resnet_model_fn
+    return _multi_tower_model_fn
 
 
 def _tower_fn(is_training, weight_decay, feature, label, data_format,
@@ -312,6 +301,7 @@ def get_experiment_fn(data_dir,
                       num_gpus,
                       variable_strategy,
                       num_eval_examples,
+                      lr_provider,
                       use_distortion_for_training=True):
     """Returns an Experiment function.
 
@@ -327,6 +317,7 @@ def get_experiment_fn(data_dir,
         variable_strategy: String. CPU to use CPU as the parameter server
         and GPU to use the GPUs as the parameter server.
         use_distortion_for_training: bool. See cifar10.Cifar10DataSet.
+        lr_provider: a function that provides a learning rate for a global step
         num_eval_examples: number of examples for the evaluation stop
     Returns:
         A function (tf.estimator.RunConfig, tf.contrib.training.HParams) ->
@@ -364,7 +355,7 @@ def get_experiment_fn(data_dir,
 
         classifier = tf.estimator.Estimator(
             model_fn=get_model_fn(num_gpus, variable_strategy,
-                                  run_config.num_worker_replicas or 1),
+                                  lr_provider=lr_provider),
             config=run_config,
             params=hparams)
 
@@ -382,10 +373,10 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
          use_distortion_for_training, log_device_placement, num_intra_threads,
          **hparams):
 
-    def learning_rate():
+    def learning_rate(global_step):
 
-        lr = hparams.learning_rate
-        batch_size = hparams.train_batch_size
+        lr = hparams["learning_rate"]
+        batch_size = hparams["train_batch_size"]
         # Suggested learning rate scheduling from
         # https://github.com/ppwwyyxx/tensorpack/blob/master/examples/ResNet/cifar10-resnet.py#L155
         num_batches_per_epoch = cifar10.Cifar10DataSet.num_examples_per_epoch(
@@ -397,9 +388,8 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
         ]
         staged_lr = [lr * x for x in [1, 0.1, 0.01, 0.002]]
 
-        learning_rate = tf.train.piecewise_constant(tf.train.get_global_step(),
-                                                    boundaries, staged_lr)
-
+        return tf.train.piecewise_constant(global_step,
+                                           boundaries, staged_lr)
 
     # The env variable is on deprecation path, default is set to off.
     os.environ['TF_SYNC_ON_FINISH'] = '0'
@@ -418,6 +408,7 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
 
     experiment_function = get_experiment_fn(data_dir, num_gpus, variable_strategy,
                                             num_eval_examples,
+                                            learning_rate,
                                             use_distortion_for_training)
 
     tf.contrib.learn.learn_runner.run(
