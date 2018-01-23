@@ -139,3 +139,18 @@ def local_device_setter(num_devices=1,
             return worker_device_spec.to_string()
 
     return _local_device_chooser
+
+
+def device_setter_fn(variable_strategy, worker_device, num_gpus):
+    my_device_setter = None
+    if variable_strategy == 'CPU':
+        my_device_setter = local_device_setter(
+            worker_device=worker_device)
+    elif variable_strategy == 'GPU':
+        my_device_setter = local_device_setter(
+            ps_device_type='gpu',
+            worker_device=worker_device,
+            ps_strategy=tf.contrib.training.GreedyLoadBalancingStrategy(
+                num_gpus, tf.contrib.training.byte_size_load_fn))
+    return my_device_setter
+

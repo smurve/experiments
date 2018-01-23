@@ -100,21 +100,22 @@ def get_model_fn(num_gpus, variable_strategy, lr_provider):
         for i in range(num_devices):
             worker_device = '/{}:{}'.format(device_type, i)
 
-
             # To make this function model-agnostic,
             # try to pass the device setter from outside
             #
-            device_setter = None
-            if variable_strategy == 'CPU':
-                device_setter = cifar10_utils.local_device_setter(
-                    worker_device=worker_device)
-            elif variable_strategy == 'GPU':
-                device_setter = cifar10_utils.local_device_setter(
-                    ps_device_type='gpu',
-                    worker_device=worker_device,
-                    ps_strategy=tf.contrib.training.GreedyLoadBalancingStrategy(
-                        num_gpus, tf.contrib.training.byte_size_load_fn))
+            # device_setter = None
+            # if variable_strategy == 'CPU':
+            #     device_setter = cifar10_utils.local_device_setter(
+            #         worker_device=worker_device)
+            # elif variable_strategy == 'GPU':
+            #     device_setter = cifar10_utils.local_device_setter(
+            #         ps_device_type='gpu',
+            #         worker_device=worker_device,
+            #         ps_strategy=tf.contrib.training.GreedyLoadBalancingStrategy(
+            #            num_gpus, tf.contrib.training.byte_size_load_fn))
 
+            device_setter = cifar10_utils.device_setter_fn(
+                variable_strategy, worker_device, num_gpus)
 
             with tf.variable_scope('neural_network', reuse=bool(i != 0)):
                 with tf.name_scope('tower_%d' % i) as name_scope:
