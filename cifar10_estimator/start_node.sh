@@ -11,3 +11,4 @@ python cifar10_main.py \
     --use-distortion-for-training=false \
     --num-gpus=2 \
     --train-steps=5000
+
