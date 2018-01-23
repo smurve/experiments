@@ -10,5 +10,4 @@ python cifar10_main.py \
     --data-dir=/var/ellie/data/cifar10_tfr/ \
     --use-distortion-for-training=false \
     --num-gpus=2 \
-    --train-steps=5000 \
-    --num_workers=2
+    --train-steps=5000
