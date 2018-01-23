@@ -17,7 +17,7 @@ class ExamplesPerSecondHook(session_run_hook.SessionRunHook):
             self,
             batch_size,
             every_n_steps=100,
-            every_n_secs=None):
+            every_n_secs=None, ):
         """Initializer for ExamplesPerSecondHook.
 
           Args:
@@ -34,10 +34,9 @@ class ExamplesPerSecondHook(session_run_hook.SessionRunHook):
 
         self._step_train_time = 0
         self._total_steps = 0
-        self._batch_size = batch_size,
+        self._batch_size = batch_size
 
     def begin(self):
-        # noinspection PyAttributeOutsideInit
         self._global_step_tensor = training_util.get_global_step()
         if self._global_step_tensor is None:
             raise RuntimeError(
@@ -59,9 +58,11 @@ class ExamplesPerSecondHook(session_run_hook.SessionRunHook):
                 self._total_steps += elapsed_steps
 
                 average_examples_per_sec = self._batch_size * (
-                        self._total_steps // self._step_train_time)
+                        self._total_steps / self._step_train_time)
                 current_examples_per_sec = steps_per_sec * self._batch_size
                 # Average examples/sec followed by current examples/sec
                 logging.info('%s: %g (%g), step = %g', 'Average examples/sec',
                              average_examples_per_sec, current_examples_per_sec,
                              self._total_steps)
+
+
