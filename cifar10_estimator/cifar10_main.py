@@ -36,6 +36,7 @@ import os
 import cifar10
 import cifar10_model
 import cifar10_utils
+import project_utils
 import reporting_utils
 import numpy as np
 import six
@@ -44,13 +45,14 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-def get_model_fn(num_gpus, variable_strategy, lr_provider):
+def get_model_fn(num_gpus, variable_strategy, device_setter_fn, lr_provider):
     """Returns a function that will build the resnet model.
     Args:
         num_gpus: number of GPUs to use (obviously)
         variable_strategy: "GPU" or "CPU"
         lr_provider: a function that takes a tf.train.get_global_step() and returns
-        a learning rate value for that step
+            a learning rate value for that step
+        device_setter_fn: A device setter
     """
 
     def _multi_tower_model_fn(features, labels, mode, params):
@@ -113,14 +115,16 @@ def get_model_fn(num_gpus, variable_strategy, lr_provider):
             #         worker_device=worker_device,
             #         ps_strategy=tf.contrib.training.GreedyLoadBalancingStrategy(
             #            num_gpus, tf.contrib.training.byte_size_load_fn))
+            # device_setter = cifar10_utils.device_setter_fn(
+            #    variable_strategy, worker_device, num_gpus)
 
-            device_setter = cifar10_utils.device_setter_fn(
-                variable_strategy, worker_device, num_gpus)
+            device_setter = device_setter_fn(
+                 variable_strategy, worker_device, num_gpus)
 
             with tf.variable_scope('neural_network', reuse=bool(i != 0)):
                 with tf.name_scope('tower_%d' % i) as name_scope:
                     with tf.device(device_setter):
-                        loss, gradvars, preds = _tower_fn(
+                        loss, gradvars, preds = _resnet_tower_fn(
                             is_training, weight_decay, tower_features[i], tower_labels[i],
                             data_format, params.num_layers, params.batch_norm_decay,
                             params.batch_norm_epsilon)
@@ -212,8 +216,8 @@ def get_model_fn(num_gpus, variable_strategy, lr_provider):
     return _multi_tower_model_fn
 
 
-def _tower_fn(is_training, weight_decay, feature, label, data_format,
-              num_layers, batch_norm_decay, batch_norm_epsilon):
+def _resnet_tower_fn(is_training, weight_decay, feature, label, data_format,
+                     num_layers, batch_norm_decay, batch_norm_epsilon):
     """Build computation tower (Resnet).
 
     Args:
@@ -302,6 +306,7 @@ def get_experiment_fn(data_dir,
                       num_gpus,
                       variable_strategy,
                       num_eval_examples,
+                      device_setter_fn,
                       lr_provider,
                       use_distortion_for_training=True):
     """Returns an Experiment function.
@@ -320,6 +325,7 @@ def get_experiment_fn(data_dir,
         use_distortion_for_training: bool. See cifar10.Cifar10DataSet.
         lr_provider: a function that provides a learning rate for a global step
         num_eval_examples: number of examples for the evaluation stop
+        device_setter_fn: A device setter function
     Returns:
         A function (tf.estimator.RunConfig, tf.contrib.training.HParams) ->
         tf.contrib.learn.Experiment.
@@ -356,6 +362,7 @@ def get_experiment_fn(data_dir,
 
         classifier = tf.estimator.Estimator(
             model_fn=get_model_fn(num_gpus, variable_strategy,
+                                  device_setter_fn,
                                   lr_provider=lr_provider),
             config=run_config,
             params=hparams)
@@ -409,6 +416,7 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
 
     experiment_function = get_experiment_fn(data_dir, num_gpus, variable_strategy,
                                             num_eval_examples,
+                                            cifar10_utils.device_setter_fn,
                                             learning_rate,
                                             use_distortion_for_training)
 
@@ -422,118 +430,9 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--data-dir',
-        type=str,
-        required=True,
-        help='The directory where the CIFAR-10 input data is stored.')
-    parser.add_argument(
-        '--job-dir',
-        type=str,
-        required=True,
-        help='The directory where the model will be stored.')
-    parser.add_argument(
-        '--variable-strategy',
-        choices=['CPU', 'GPU'],
-        type=str,
-        default='CPU',
-        help='Where to locate variable operations')
-    parser.add_argument(
-        '--num-gpus',
-        type=int,
-        default=1,
-        help='The number of gpus used. Uses only CPU if set to 0.')
-    parser.add_argument(
-        '--num-layers',
-        type=int,
-        default=44,
-        help='The number of layers of the model.')
-    parser.add_argument(
-        '--train-steps',
-        type=int,
-        default=2000,
-        help='The number of steps to use for training.')
-    parser.add_argument(
-        '--train-batch-size',
-        type=int,
-        default=128,
-        help='Batch size for training.')
-    parser.add_argument(
-        '--eval-batch-size',
-        type=int,
-        default=100,
-        help='Batch size for validation.')
-    parser.add_argument(
-        '--momentum',
-        type=float,
-        default=0.9,
-        help='Momentum for MomentumOptimizer.')
-    parser.add_argument(
-        '--weight-decay',
-        type=float,
-        default=2e-4,
-        help='Weight decay for convolutions.')
-    parser.add_argument(
-        '--learning-rate',
-        type=float,
-        default=0.1,
-        help="""\
-      This is the inital learning rate value. The learning rate will decrease
-      during training. For more details check the model_fn implementation in
-      this file.\
-      """)
-    parser.add_argument(
-        '--use-distortion-for-training',
-        type=bool,
-        default=False,
-        help='If doing image distortion for training.')
-    parser.add_argument(
-        '--sync',
-        action='store_true',
-        default=False,
-        help="""\
-      If present when running in a distributed environment will run on sync mode.\
-      """)
-    parser.add_argument(
-        '--num-intra-threads',
-        type=int,
-        default=0,
-        help="""\
-      Number of threads to use for intra-op parallelism. When training on CPU
-      set to 0 to have the system pick the appropriate number or alternatively
-      set it to the number of physical CPU cores.\
-      """)
-    parser.add_argument(
-        '--num-inter-threads',
-        type=int,
-        default=0,
-        help="""\
-      Number of threads to use for inter-op parallelism. If set to 0, the
-      system will pick an appropriate number.\
-      """)
-    parser.add_argument(
-        '--data-format',
-        type=str,
-        default=None,
-        help="""\
-      If not set, the data format best for the training device is used. 
-      Allowed values: channels_first (NCHW) channels_last (NHWC).\
-      """)
-    parser.add_argument(
-        '--log-device-placement',
-        action='store_true',
-        default=False,
-        help='Whether to log device placement.')
-    parser.add_argument(
-        '--batch-norm-decay',
-        type=float,
-        default=0.997,
-        help='Decay for batch norm.')
-    parser.add_argument(
-        '--batch-norm-epsilon',
-        type=float,
-        default=1e-5,
-        help='Epsilon for batch norm.')
+
+    project_utils.add_default_arguments(parser)
+
     args = parser.parse_args()
 
     if args.num_gpus < 0:
