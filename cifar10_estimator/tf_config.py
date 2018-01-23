@@ -18,5 +18,5 @@ print(json.dumps(
     {'cluster': cluster,
      'task': {'type': node_type, 'index': 0},
      'model_dir': '/var/ellie/models/cifar10_new',
-     'environment': 'local'
+     'environment': 'cloud'
      }))

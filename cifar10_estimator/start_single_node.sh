@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-node_type=$1 # either of ps, master, worker
-task_index=$2
-steps=$3
-shift
-shift
-shift
-
 export TF_CONFIG=$(python tf_config.py ${node_type} ${task_index})
 
 python cifar10_main.py \
@@ -15,5 +8,4 @@ python cifar10_main.py \
     --use-distortion-for-training=false \
     --num-gpus=2 \
     --sync \
-    --train-steps=${steps} \
     "$@"
