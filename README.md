@@ -34,6 +34,8 @@ will attempt to install a tensorflow version that requires NVIDIA's libcuda 9.0+
 
 ## Build
 
+At best, you start from Jenkinsfile that describes the build process.
+
 There are various docker images to be built in this project
  - A variety of model trainers that can run as kubernetes jobs
  - A flask web application that uses some of the models

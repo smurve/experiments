@@ -17,6 +17,9 @@ pipeline {
     }
     stage('build trainer') {
       steps {
+        /*
+            Note that you need to have dockerhub credentials in Jenkins for the docker push command to succeed.
+        */
         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
           sh 'docker build -t smurve/capsnet-fashion-trainer:latest-gpu -f Dockerfile-mnist-trainer-gpu .'
           sh 'docker login --password $PASSWORD --username $USERNAME'
