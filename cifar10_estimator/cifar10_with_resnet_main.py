@@ -35,9 +35,8 @@ import os
 import numpy as np
 import tensorflow as tf
 
-import cifar10
-import cifar10_data
-import cifar10_utils
+import cifar10_input
+import resnet_utils
 import project_utils
 import resnet_model
 import towers
@@ -48,15 +47,18 @@ tf.logging.set_verbosity(tf.logging.INFO)
 #
 #   ResNet for CIFAR10 using my abstraction of Alex Krizhevsky's towers
 #
+#   Refactored form
+#
 def main(job_dir, data_dir, num_gpus, variable_strategy,
          use_distortion_for_training, log_device_placement, num_intra_threads,
          **hparams):
+
     def learning_rate(global_step):
         lr = hparams["learning_rate"]
         batch_size = hparams["train_batch_size"]
         # Suggested learning rate scheduling from
         # https://github.com/ppwwyyxx/tensorpack/blob/master/examples/ResNet/cifar10-resnet.py#L155
-        num_batches_per_epoch = cifar10.Cifar10DataSet.num_examples_per_epoch(
+        num_batches_per_epoch = cifar10_input.Cifar10DataSet.num_examples_per_epoch(
             'train') // batch_size
 
         boundaries = [
@@ -78,13 +80,13 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
         intra_op_parallelism_threads=num_intra_threads,
         gpu_options=tf.GPUOptions(force_gpu_compatible=True))
 
-    config = cifar10_utils.RunConfig(session_config=sess_config,
-                                     model_dir=job_dir)
+    config = resnet_utils.RunConfig(session_config=sess_config,
+                                    model_dir=job_dir)
 
-    num_eval_examples = cifar10.Cifar10DataSet.num_examples_per_epoch('eval')
+    num_eval_examples = cifar10_input.Cifar10DataSet.num_examples_per_epoch('eval')
 
     train_input_fn = functools.partial(
-        cifar10_data.input_fn,
+        cifar10_input.input_fn,
         data_dir,
         subset='train',
         num_shards=num_gpus,
@@ -92,7 +94,7 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
         use_distortion_for_training=use_distortion_for_training)
 
     eval_input_fn = functools.partial(
-        cifar10_data.input_fn,
+        cifar10_input.input_fn,
         data_dir,
         subset='eval',
         batch_size=hparams["eval_batch_size"],
@@ -102,7 +104,7 @@ def main(job_dir, data_dir, num_gpus, variable_strategy,
                                                    train_input_fn, eval_input_fn,
                                                    num_gpus, variable_strategy,
                                                    num_eval_examples,
-                                                   cifar10_utils.device_setter_fn,
+                                                   resnet_utils.device_setter_fn,
                                                    learning_rate)
 
     tf.contrib.learn.learn_runner.run(

@@ -190,10 +190,12 @@ class ResNet(object):
             fused=True,
             data_format=data_format)
 
-    def _relu(self, x):
+    @staticmethod
+    def _relu(x):
         return tf.nn.relu(x)
 
-    def _fully_connected(self, x, out_dim):
+    @staticmethod
+    def _fully_connected(x, out_dim):
         with tf.name_scope('fully_connected') as name_scope:
             x = tf.layers.dense(x, out_dim)
 

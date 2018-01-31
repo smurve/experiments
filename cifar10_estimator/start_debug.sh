@@ -10,7 +10,7 @@ echo "================================================================"
 
 ROOT_DIR=/Users/wgiersche/tmp
 
-python cifar10_main.py \
+python cifar10_with_resnet_main.py \
     --job-dir=${ROOT_DIR}/cifar10_new \
     --data-dir=/var/ellie/data/cifar10_tfr/ \
     --use-distortion-for-training=false \
