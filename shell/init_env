@@ -16,16 +16,33 @@ then
 else # this is intended. Can't use exit, since this file is supposed to be sourced. Will close at the very end of the script
 
 
-usegpu=false
-if [ "$1" = "-g" ] || [ "$1" = "--use-gpu" ]
+num_gpus=0
+if [ "$(which nvidia-smi)" != "" ]
 then
-    usegpu=true
-    shift
+    num_gpus = $(nvidia-smi -q | grep "Product Name" | wc -l)
 fi
 
+if [  "$num_gpus" != "0" ]
+then
+    usegpu=true
+    echo
+    echo "========================================================================================================"
+    echo Found ${num_gpus} on the system:
+    echo $(nvidia-smi -q | grep "Product Name")
+    echo Pip is going to install tensorflow with gpu support
+    echo "========================================================================================================"
+    echo
+else
+    echo
+    echo "========================================================================================================"
+    echo  Did not find any usable GPUs. pip is going to install tensorflow without gpu support
+    echo "========================================================================================================"
+    echo
+    usegpu=false
+fi
 
 #
-# If you didn't specify the environment name, we will always create a fresh environment
+# If you didn't specify the environment name, we will always create a fresh environment named 'venv'
 #
 if [ "$1" = "" ]
 then
