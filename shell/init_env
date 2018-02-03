@@ -19,7 +19,7 @@ else # this is intended. Can't use exit, since this file is supposed to be sourc
 num_gpus=0
 if [ "$(which nvidia-smi)" != "" ]
 then
-    num_gpus = $(nvidia-smi -q | grep "Product Name" | wc -l)
+    num_gpus=$(nvidia-smi -q | grep "Product Name" | wc -l)
 fi
 
 if [  "$num_gpus" != "0" ]
