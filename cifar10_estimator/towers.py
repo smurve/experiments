@@ -55,7 +55,7 @@ def get_multi_tower_fn(num_gpus, variable_strategy,
           A EstimatorSpec object.
         """
         is_training = (mode == tf.estimator.ModeKeys.TRAIN)
-        momentum = params.momentum
+        momentum = params['momentum']
 
         tower_features = features
         tower_labels = labels
@@ -66,7 +66,7 @@ def get_multi_tower_fn(num_gpus, variable_strategy,
         # channels first (NCHW) is normally optimal on GPU and channels last (NHWC)
         # on CPU. The exception is Intel MKL on CPU which is optimal with
         # channels_last.
-        data_format = params.data_format
+        data_format = params['data_format']
         if not data_format:
             if num_gpus == 0:
                 data_format = 'channels_last'
@@ -95,12 +95,6 @@ def get_multi_tower_fn(num_gpus, variable_strategy,
                                      tower_features[i],
                                      tower_labels[i],
                                      data_format, params)
-
-                        # loss, gradvars, preds = \
-                        #     resnet_model.resnet_model_fn(is_training,
-                        #                                  tower_features[i],
-                        #                                  tower_labels[i],
-                        #                                  data_format, params)
 
                         tower_losses.append(loss)
                         tower_gradvars.append(gradvars)
@@ -140,7 +134,7 @@ def get_multi_tower_fn(num_gpus, variable_strategy,
             loss = tf.reduce_mean(tower_losses, name='loss')
 
             examples_sec_hook = reporting_utils.ExamplesPerSecondHook(
-                params.train_batch_size, every_n_steps=10)
+                params['train_batch_size'], every_n_steps=10)
 
             tensors_to_log = {'learning_rate': learning_rate, 'loss': loss}
 
@@ -152,7 +146,7 @@ def get_multi_tower_fn(num_gpus, variable_strategy,
             optimizer = tf.train.MomentumOptimizer(
                 learning_rate=learning_rate, momentum=momentum)
 
-            if params.sync:
+            if params['sync']:
                 raise ValueError("We don't support parallel processing at the moment.")
                 # optimizer = tf.train.SyncReplicasOptimizer(
                 #     optimizer, replicas_to_aggregate=num_workers)

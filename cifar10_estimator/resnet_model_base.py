@@ -199,7 +199,7 @@ class ResNet(object):
         with tf.name_scope('fully_connected') as name_scope:
             x = tf.layers.dense(x, out_dim)
 
-        tf.logging.info('image after unit %s: %s', name_scope, x.get_shape())
+        tf.logging.debug('image after unit %s: %s', name_scope, x.get_shape())
         return x
 
     def _avg_pool(self, x, pool_size, stride):
@@ -207,7 +207,7 @@ class ResNet(object):
             x = tf.layers.average_pooling2d(
                 x, pool_size, stride, 'SAME', data_format=self._data_format)
 
-        tf.logging.info('image after unit %s: %s', name_scope, x.get_shape())
+        tf.logging.debug('image after unit %s: %s', name_scope, x.get_shape())
         return x
 
     def _global_avg_pool(self, x):
@@ -217,5 +217,5 @@ class ResNet(object):
                 x = tf.reduce_mean(x, [2, 3])
             else:
                 x = tf.reduce_mean(x, [1, 2])
-        tf.logging.info('image after unit %s: %s', name_scope, x.get_shape())
+        tf.logging.debug('image after unit %s: %s', name_scope, x.get_shape())
         return x

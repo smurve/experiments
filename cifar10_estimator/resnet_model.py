@@ -17,10 +17,10 @@ def resnet_model_fn(is_training, feature, label, data_format, params):
       predictions.
 
     """
-    num_layers = params.num_layers
-    batch_norm_decay = params.batch_norm_decay
-    batch_norm_epsilon = params.batch_norm_epsilon
-    weight_decay = params.weight_decay
+    num_layers = params['num_layers']
+    batch_norm_decay = params['batch_norm_decay']
+    batch_norm_epsilon = params['batch_norm_epsilon']
+    weight_decay = params['weight_decay']
 
     model = cifar10_with_resnet_model.ResNetCifar10(
         num_layers,
