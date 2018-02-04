@@ -65,6 +65,8 @@ else
             rm -rf "$envdir"
             create_envdir=true
         fi
+    else
+        create_envdir=true
     fi
 fi
 
