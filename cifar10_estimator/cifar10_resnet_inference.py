@@ -13,7 +13,6 @@ import cifar10_with_resnet_model
 import project_utils
 
 
-
 def main():
 
     #
@@ -37,7 +36,7 @@ def main():
     allvars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
     var_map = {"neural_network/" + v.name.split(':')[0]: v for v in allvars}
     tf.logging.set_verbosity(tf.logging.WARN)
-    tf.train.init_from_checkpoint("/var/ellie/models/cifar10_new/model.ckpt-50000", var_map)
+    tf.train.init_from_checkpoint("/var/ellie/models/cifar10_new/model.ckpt-80000", var_map)
     tf.logging.set_verbosity(tf.logging.INFO)
 
     with tf.Session() as sess:
