@@ -41,7 +41,7 @@ three_workers = {"ps": ["localhost:2222"],
 
 spec = three_workers
 
-chief = len(spec['worker']) - 1
+chief = 0  # '= len(spec['worker']) - 1
 
 cluster = tf.train.ClusterSpec(spec)
 # cluster = tf.train.ClusterSpec(single_worker)
@@ -115,7 +115,7 @@ def create_optimizer(model, targets, global_step):
 
 
 # Train the model (a single step)
-def train(sess, model, targets, accuracy, train_op, step, global_step, summary, writer):
+def train(sess, is_chief, model, targets, accuracy, train_op, step, global_step, summary, writer):
     import time
     start_time = time.time()
     batch_x, batch_y = mnist.train.next_batch(batch_size)
@@ -134,8 +134,8 @@ def train(sess, model, targets, accuracy, train_op, step, global_step, summary, 
                                             feed_dict={
                                                 model.inputs[0]: mnist.test.images,
                                                 targets: mnist.test.labels})
-
-        writer.add_summary(_summary, step_value)
+        if is_chief:
+            writer.add_summary(_summary, step_value)
 
         print("Global Step: %d," % step_value,
               "Local: %2d," % step,
@@ -172,10 +172,12 @@ def run():
 
         print("Waiting for other servers")
 
+        is_chief = (FLAGS.task_index == chief)
+
     with tf.train.MonitoredTrainingSession(
             checkpoint_dir='/tmp/train_models',
             master=server.target,
-            is_chief=(FLAGS.task_index == chief),
+            is_chief=is_chief,
             save_checkpoint_secs=2) as sess:
 
         sess.run(init_op)
@@ -183,10 +185,11 @@ def run():
         keras.backend.set_session(sess)
 
         local_step = 0
+
         train_writer = tf.summary.FileWriter("/tmp/train_logs")
 
         while not sess.should_stop() and local_step < training_iterations:
-            train(sess, model, labels, accuracy,
+            train(sess, is_chief, model, labels, accuracy,
                   train_op, local_step, global_step, summary, train_writer)
             local_step += 1
 
