@@ -1,17 +1,9 @@
-#  Copyright 2018 The TensorFlow Authors. All Rights Reserved.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-"""tf.data.Dataset interface to the MNIST dataset."""
+"""
+    tf.data.Dataset interface to the MNIST dataset.
+    Based on:
+    "Convolutional Neural Network Estimator for MNIST, built with tf.layers"
+    https://github.com/tensorflow/models/tree/master/official/mnist
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -23,6 +15,21 @@ import gzip
 import numpy as np
 from six.moves import urllib
 import tensorflow as tf
+
+
+def train_input_fn(data_dir, batch_size, epochs):
+    def _input_fn():
+        ds = train_dataset(data_dir)
+        ds = ds.cache().shuffle(buffer_size=50000).batch(batch_size).repeat(epochs)
+        return ds
+    return _input_fn
+
+
+def eval_input_fn(data_dir, batch_size):
+    def _input_fn():
+        return test_dataset(data_dir).batch(
+            batch_size).make_one_shot_iterator().get_next()
+    return _input_fn
 
 
 def read32(bytestream):
@@ -102,12 +109,12 @@ def dataset(directory, images_file, labels_file):
     return tf.data.Dataset.zip((images, labels))
 
 
-def train(directory):
+def train_dataset(directory):
     """tf.data.Dataset object for MNIST training data."""
     return dataset(directory, 'train-images-idx3-ubyte',
                    'train-labels-idx1-ubyte')
 
 
-def test(directory):
+def test_dataset(directory):
     """tf.data.Dataset object for MNIST test data."""
     return dataset(directory, 't10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte')
