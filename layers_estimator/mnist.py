@@ -17,12 +17,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
 import sys
-
-import tensorflow as tf
-
+import warnings
 import dataset
+from arg_parser import MNISTArgParser
+
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    import tensorflow as tf
 
 
 class Model(object):
@@ -37,6 +40,14 @@ class Model(object):
             typically faster on CPUs. See
             https://www.tensorflow.org/performance/performance_guide#data_formats
         """
+        #
+        # Assign operations to local server
+        #
+        # task = FLAGS.task_index
+        # with tf.device(tf.train.replica_device_setter(
+        #         worker_device="/job:worker/task:%d" % task,
+        #         cluster=spec)):
+
         if data_format == 'channels_first':
             self._input_shape = [-1, 1, 28, 28]
         else:
@@ -77,6 +88,7 @@ class Model(object):
 
 def model_fn(features, labels, mode, params):
     """The model_fn argument for creating an Estimator."""
+
     model = Model(params['data_format'])
     image = features
     if isinstance(image, dict):
@@ -107,6 +119,7 @@ def model_fn(features, labels, mode, params):
         loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
         accuracy = tf.metrics.accuracy(
             labels=labels, predictions=tf.argmax(logits, axis=1))
+
         # Name the accuracy tensor 'train_accuracy' to demonstrate the
         # LoggingTensorHook.
         tf.identity(accuracy[1], name='train_accuracy')
@@ -155,23 +168,37 @@ def validate_batch_size_for_multi_gpu(batch_size):
         raise ValueError(err)
 
 
+def train_input_fn():
+    ds = dataset.train(FLAGS.data_dir)
+    ds = ds.cache().shuffle(buffer_size=50000).batch(FLAGS.batch_size).repeat(
+        FLAGS.train_epochs)
+    return ds
+
+
+def eval_input_fn():
+    return dataset.test(FLAGS.data_dir).batch(
+        FLAGS.batch_size).make_one_shot_iterator().get_next()
+
+
+#
+# Create the graph and perform the training
+#
 def main(_):
+
     model_function = model_fn
 
     if FLAGS.multi_gpu:
         print("replicating model...")
         validate_batch_size_for_multi_gpu(FLAGS.batch_size)
 
-        # There are two steps required if using multi-GPU: (1) wrap the model_fn,
-        # and (2) wrap the optimizer. The first happens here, and (2) happens
-        # in the model_fn itself when the optimizer is defined.
         model_function = tf.contrib.estimator.replicate_model_fn(
-            model_fn, loss_reduction=tf.losses.Reduction.MEAN)
+            model_function, loss_reduction=tf.losses.Reduction.MEAN)
 
     data_format = FLAGS.data_format
     if data_format is None:
         data_format = ('channels_first'
                        if tf.test.is_built_with_cuda() else 'channels_last')
+
     mnist_classifier = tf.estimator.Estimator(
         model_fn=model_function,
         model_dir=FLAGS.model_dir,
@@ -180,83 +207,26 @@ def main(_):
             'multi_gpu': FLAGS.multi_gpu
         })
 
-    # Train the model
-    def train_input_fn():
-        # When choosing shuffle buffer sizes, larger sizes result in better
-        # randomness, while smaller sizes use less memory. MNIST is a small
-        # enough dataset that we can easily shuffle the full epoch.
-        ds = dataset.train(FLAGS.data_dir)
-        ds = ds.cache().shuffle(buffer_size=50000).batch(FLAGS.batch_size).repeat(
-            FLAGS.train_epochs)
-        return ds
-
     # Set up training hook that logs the training accuracy every 100 steps.
     tensors_to_log = {'train_accuracy': 'train_accuracy'}
     logging_hook = tf.train.LoggingTensorHook(
-        tensors=tensors_to_log, every_n_iter=100)
+        tensors=tensors_to_log, every_n_iter=10)
 
+    #
+    # Perform the training and export the model
+    #
     mnist_classifier.train(input_fn=train_input_fn, hooks=[logging_hook])
-
-    # Evaluate the model and print results
-    def eval_input_fn():
-        return dataset.test(FLAGS.data_dir).batch(
-            FLAGS.batch_size).make_one_shot_iterator().get_next()
 
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print()
     print('Evaluation results:\n\t%s' % eval_results)
 
-    # Export the model
     if FLAGS.export_dir is not None:
         image = tf.placeholder(tf.float32, [None, 28, 28])
         input_fn = tf.estimator.export.build_raw_serving_input_receiver_fn({
             'image': image,
         })
         mnist_classifier.export_savedmodel(FLAGS.export_dir, input_fn)
-
-
-class MNISTArgParser(argparse.ArgumentParser):
-
-    def __init__(self):
-        super(MNISTArgParser, self).__init__()
-
-        self.add_argument(
-            '--multi_gpu', action='store_true',
-            help='If set, run across all available GPUs.')
-        self.add_argument(
-            '--batch_size',
-            type=int,
-            default=100,
-            help='Number of images to process in a batch')
-        self.add_argument(
-            '--data_dir',
-            type=str,
-            default='/tmp/mnist_data',
-            help='Path to directory containing the MNIST dataset')
-        self.add_argument(
-            '--model_dir',
-            type=str,
-            default='/tmp/mnist_model',
-            help='The directory where the model will be stored.')
-        self.add_argument(
-            '--train_epochs',
-            type=int,
-            default=1,
-            help='Number of epochs to train.')
-        self.add_argument(
-            '--data_format',
-            type=str,
-            default=None,
-            choices=['channels_first', 'channels_last'],
-            help='A flag to override the data format used in the model. '
-                 'channels_first provides a performance boost on GPU but is not always '
-                 'compatible with CPU. If left unspecified, the data format will be '
-                 'chosen automatically based on whether TensorFlow was built for CPU or '
-                 'GPU.')
-        self.add_argument(
-            '--export_dir',
-            type=str,
-            help='The directory where the exported SavedModel will be stored.')
 
 
 if __name__ == '__main__':
