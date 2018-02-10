@@ -19,6 +19,7 @@ class Model(object):
             typically faster on CPUs. See
             https://www.tensorflow.org/performance/performance_guide#data_formats
         """
+        self.data_format = data_format
         width = 28
         height = 28
         if data_format == 'channels_first':
@@ -27,15 +28,17 @@ class Model(object):
             assert data_format == 'channels_last'
             self._input_shape = [-1, width, height, 1]
 
-        self.conv1 = tf.layers.Conv2D(
-            32, 5, padding='same', data_format=data_format, activation=tf.nn.relu)
-        self.conv2 = tf.layers.Conv2D(
-            64, 5, padding='same', data_format=data_format, activation=tf.nn.relu)
-        self.fc1 = tf.layers.Dense(1024, activation=tf.nn.relu)
-        self.fc2 = tf.layers.Dense(10)
-        self.dropout = tf.layers.Dropout(0.4)
-        self.max_pool2d = tf.layers.MaxPooling2D(
-            (2, 2), (2, 2), padding='same', data_format=data_format)
+    @staticmethod
+    def dense(name, outputsize):
+        return tf.layers.Dense(outputsize, activation=tf.nn.relu, name=name)
+
+    def maxpool(self, name):
+        return tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same',
+                                      data_format=self.data_format, name=name)
+
+    def conv(self, name, n_fields, size_fields):
+        return tf.layers.Conv2D(n_fields, size_fields, padding='same',
+                                data_format=self.data_format, activation=tf.nn.relu, name=name)
 
     def fwd_pass(self, inputs, training):
         """The model's forward pass
@@ -50,13 +53,24 @@ class Model(object):
           logits and probabilities with shape [<batch_size>, 10].
         """
         y = tf.reshape(inputs, self._input_shape)
-        y = self.conv1(y)
-        y = self.max_pool2d(y)
-        y = self.conv2(y)
-        y = self.max_pool2d(y)
+
+        y = self.conv(n_fields=32, size_fields=5, name="conv1")(y)
+        y = self.maxpool(name="max1")(y)
+
+        y = self.conv(n_fields=64, size_fields=5, name="conv1")(y)
+        y = self.maxpool(name="max2")(y)
+
+        y = self.conv(n_fields=128, size_fields=5, name="conv1")(y)
+        y = self.maxpool(name="max3")(y)
+
         y = tf.layers.flatten(y)
-        y = self.fc1(y)
-        y = self.dropout(y, training=training)
-        logits = self.fc2(y)
+
+        y = self.dense(outputsize=2048, name="dense1")(y)
+        y = tf.layers.Dropout(0.4)(y, training=training)
+
+        y = self.dense(outputsize=256, name="dense1")(y)
+        y = tf.layers.Dropout(0.4)(y, training=training)
+
+        logits = tf.layers.Dense(10)(y)
 
         return logits, tf.nn.softmax(logits)
