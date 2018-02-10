@@ -9,3 +9,4 @@ capsnet-fashion.iml
 /train/
 src/app/images/
 /tf15/
+*.pyc
