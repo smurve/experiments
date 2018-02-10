@@ -18,14 +18,10 @@ from __future__ import division
 from __future__ import print_function
 
 import sys
-import warnings
 import dataset
 from arg_parser import MNISTArgParser
-
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    import tensorflow as tf
+from utilities import validate_batch_size_for_multi_gpu
+import tensorflow as tf
 
 
 class Model(object):
@@ -40,14 +36,6 @@ class Model(object):
             typically faster on CPUs. See
             https://www.tensorflow.org/performance/performance_guide#data_formats
         """
-        #
-        # Assign operations to local server
-        #
-        # task = FLAGS.task_index
-        # with tf.device(tf.train.replica_device_setter(
-        #         worker_device="/job:worker/task:%d" % task,
-        #         cluster=spec)):
-
         if data_format == 'channels_first':
             self._input_shape = [-1, 1, 28, 28]
         else:
@@ -116,7 +104,9 @@ def model_fn(features, labels, mode, params):
             optimizer = tf.contrib.estimator.TowerOptimizer(optimizer)
 
         logits = model(image, training=True)
+
         loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+
         accuracy = tf.metrics.accuracy(
             labels=labels, predictions=tf.argmax(logits, axis=1))
 
@@ -124,6 +114,7 @@ def model_fn(features, labels, mode, params):
         # LoggingTensorHook.
         tf.identity(accuracy[1], name='train_accuracy')
         tf.summary.scalar('train_accuracy', accuracy[1])
+
         return tf.estimator.EstimatorSpec(
             mode=tf.estimator.ModeKeys.TRAIN,
             loss=loss,
@@ -141,31 +132,6 @@ def model_fn(features, labels, mode, params):
                         labels=labels,
                         predictions=tf.argmax(logits, axis=1)),
             })
-
-
-def validate_batch_size_for_multi_gpu(batch_size):
-    """For multi-gpu, batch-size must be a multiple of the number of
-    available GPUs.
-
-    Note that this should eventually be handled by replicate_model_fn
-    directly. Multi-GPU support is currently experimental, however,
-    so doing the work here until that feature is in place.
-    """
-    from tensorflow.python.client import device_lib
-
-    local_device_protos = device_lib.list_local_devices()
-    num_gpus = sum([1 for d in local_device_protos if d.device_type == 'GPU'])
-    if not num_gpus:
-        raise ValueError('Multi-GPU mode was specified, but no GPUs '
-                         'were found. To use CPU, run without --multi_gpu.')
-
-    remainder = batch_size % num_gpus
-    if remainder:
-        err = ('When running with multiple GPUs, batch size '
-               'must be a multiple of the number of available GPUs. '
-               'Found {} GPUs with a batch size of {}; try --batch_size={} instead.'
-               ).format(num_gpus, batch_size, batch_size - remainder)
-        raise ValueError(err)
 
 
 def train_input_fn():

@@ -1,6 +1,7 @@
 #@IgnoreInspection BashAddShebang
 PY=python3
-TF_VERSION=1.5
+TF_VERSION=1.7.0.dev20180210
+TF_NIGHTLY=tf_nightly
 echo
 echo "========================================================================================================"
 echo using `which ${PY}`
@@ -10,7 +11,7 @@ echo
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]
 then
-    echo "Usage: source init_env [-g|--use-gpu] [env]"
+    echo "Usage: source init_env [env]"
     echo
     echo env: Name of the environment folder, defaults to venv
 else # this is intended. Can't use exit, since this file is supposed to be sourced. Will close at the very end of the script
@@ -24,7 +25,7 @@ fi
 
 if [  "$num_gpus" != "0" ]
 then
-    usegpu=true
+    USE_GPU="-gpu"
     echo
     echo "========================================================================================================"
     echo Found ${num_gpus} on the system:
@@ -38,7 +39,6 @@ else
     echo  Did not find any usable GPUs. pip is going to install tensorflow without gpu support
     echo "========================================================================================================"
     echo
-    usegpu=false
 fi
 
 #
@@ -74,26 +74,30 @@ if [ "${create_envdir}" = "true" ]
 then
     virtualenv --python=${PY} ${envdir}
     . ./${envdir}/bin/activate
+
+
     echo
     echo "========================================================================================================"
-    echo installing packages
+    echo Installing packages
     echo "========================================================================================================"
-    if [ "${usegpu}" = "true" ]
+    if [ -z ${TF_NIGHTLY} ]
     then
-        echo "========================================================================================================"
-        echo installing tensorflow with GPU support. This requires cuda version 9.0+ installed.
-        echo "========================================================================================================"
-        ${PY} -m pip install tensorflow-gpu==${TF_VERSION}
+        TENSORFLOW=tensorflow${USE_GPU}==${TF_VERSION}
     else
-        echo "========================================================================================================"
-        echo installing tensorflow with CPU support only
-        echo "========================================================================================================"
-        ${PY} -m pip install tensorflow==${TF_VERSION}
+        TENSORFLOW=tf-nightly${USE_GPU}
     fi
-    for pkg in $(cat ./shell/package.versions)
-    do
-        ${PY} -m pip install ${pkg}
-    done
+
+    echo "========================================================================================================"
+    if [ -z ${USE_GPU} ]
+    then
+        echo Installing ${TENSORFLOW} with CPU support only
+    else
+        echo Installing ${TENSORFLOW} with GPU support. This requires cuda version 9.0+ installed.
+    fi
+    echo "========================================================================================================"
+    ${PY} -m pip install ${TENSORFLOW}
+
+    ${PY} -m pip install -r ./shell/package.versions
 
 else
     echo
