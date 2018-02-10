@@ -100,6 +100,7 @@ def model_fn(features, labels, mode, params):
 
         # If we are running multi-GPU, we need to wrap the optimizer.
         if params.get('multi_gpu'):
+            print("Using Tower Optimizer...")
             optimizer = tf.contrib.estimator.TowerOptimizer(optimizer)
 
         logits = model(image, training=True)
@@ -158,6 +159,7 @@ def main(_):
     model_function = model_fn
 
     if FLAGS.multi_gpu:
+        print("replicating model...")
         validate_batch_size_for_multi_gpu(FLAGS.batch_size)
 
         # There are two steps required if using multi-GPU: (1) wrap the model_fn,
