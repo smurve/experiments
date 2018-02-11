@@ -129,9 +129,8 @@ class DefaultArgParser(argparse.ArgumentParser):
             help='Number of images to process in a batch')
         self.add_argument(
             '--data_dir',
-            type=str,
-            default='/tmp/mnist_data',
-            help='Path to directory containing the MNIST dataset')
+            type=str, required=True,
+            help='Path to directory containing the input data')
         self.add_argument(
             '--model_dir',
             type=str, required=True,

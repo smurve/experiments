@@ -13,7 +13,7 @@ import sys
 from utilities import validate_batch_size_for_multi_gpu, create_spec_provider, DefaultArgParser
 import tensorflow as tf
 from simple_convnet import SimpleConvnet
-from mnist_dataset import eval_input_fn, train_input_fn
+from cifar10_dataset import eval_input_fn, train_input_fn
 
 
 #
@@ -38,7 +38,7 @@ def main(_):
         return extr
 
     model_function = create_spec_provider(
-        lambda: SimpleConvnet(data_format, width=28, height=28, channels=1, n_classes=10),
+        lambda: SimpleConvnet(data_format, width=32, height=32, channels=3, n_classes=10),
         get_input_tensor)
 
     if FLAGS.multi_gpu:
@@ -48,7 +48,7 @@ def main(_):
         model_function = tf.contrib.estimator.replicate_model_fn(
             model_function, loss_reduction=tf.losses.Reduction.MEAN)
 
-    mnist_classifier = tf.estimator.Estimator(
+    cifar10_classifier = tf.estimator.Estimator(
         model_fn=model_function,
         model_dir=FLAGS.model_dir,
         params={
@@ -65,20 +65,20 @@ def main(_):
     # Perform the training and export the model
     #
     train_input = train_input_fn(FLAGS.data_dir, FLAGS.batch_size, FLAGS.train_epochs)
-    mnist_classifier.train(input_fn=train_input, hooks=[logging_hook])
+    cifar10_classifier.train(input_fn=train_input, hooks=[logging_hook])
 
     eval_input = eval_input_fn(FLAGS.data_dir, FLAGS.batch_size)
-    eval_results = mnist_classifier.evaluate(input_fn=eval_input)
+    eval_results = cifar10_classifier.evaluate(input_fn=eval_input)
 
     print()
     print('Evaluation results:\n\t%s' % eval_results)
 
     if FLAGS.export_dir is not None:
-        image = tf.placeholder(tf.float32, [None, 28, 28])
+        image = tf.placeholder(tf.float32, [None, 32, 32, 3])
         input_fn = tf.estimator.export.build_raw_serving_input_receiver_fn({
             'image': image,
         })
-        mnist_classifier.export_savedmodel(FLAGS.export_dir, input_fn)
+        cifar10_classifier.export_savedmodel(FLAGS.export_dir, input_fn)
 
 
 if __name__ == '__main__':

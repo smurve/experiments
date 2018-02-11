@@ -7,11 +7,11 @@
 import tensorflow as tf
 
 
-class Model(object):
+class SimpleConvnet(object):
     """Class that defines a graph to recognize digits in the MNIST dataset."""
 
-    def __init__(self, data_format):
-        """Creates a model for classifying a hand-written digit.
+    def __init__(self, data_format, width, height, channels, n_classes):
+        """Creates a simple 3-layer convolutional network.
 
         Args:
           data_format: Either 'channels_first' or 'channels_last'.
@@ -20,13 +20,12 @@ class Model(object):
             https://www.tensorflow.org/performance/performance_guide#data_formats
         """
         self.data_format = data_format
-        width = 28
-        height = 28
+        self.n_classes = n_classes
         if data_format == 'channels_first':
-            self._input_shape = [-1, 1, width, height]
+            self._input_shape = [-1, channels, width, height]
         else:
             assert data_format == 'channels_last'
-            self._input_shape = [-1, width, height, 1]
+            self._input_shape = [-1, width, height, channels]
 
     @staticmethod
     def dense(name, outputsize):
@@ -71,6 +70,6 @@ class Model(object):
         y = self.dense(outputsize=256, name="dense1")(y)
         y = tf.layers.Dropout(0.4)(y, training=training)
 
-        logits = tf.layers.Dense(10)(y)
+        logits = tf.layers.Dense(self.n_classes)(y)
 
         return logits, tf.nn.softmax(logits)
