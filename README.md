@@ -4,7 +4,6 @@
 
 ## !!! STILL UNDER CONSTRUCTION !!!
 
-#### Eventually, I'll host Project Ellie's version of Geoffrey Hinton's capsnet here.
 Just in case you wondered: [*"Ellie" is the little girl that broke your f...ing finger!*](https://www.youtube.com/watch?v=nP6k_PaUW84&t=570)
 
 No, honestly, Ellie is just short for Elektra". You know, when Mum called you by your full name,
