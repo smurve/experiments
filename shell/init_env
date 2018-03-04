@@ -1,7 +1,13 @@
 #@IgnoreInspection BashAddShebang
 PY=python3
-TF_VERSION=1.7.0.dev20180210
-TF_NIGHTLY=tf_nightly
+
+# Bleeding edge, but it works!
+#TF_VERSION=1.7.0.dev20180210
+#TF=tf_nightly
+
+TF=tensorflow
+TF_VERSION=1.6.0-rc1
+
 echo
 echo "========================================================================================================"
 echo using `which ${PY}`
@@ -75,17 +81,11 @@ then
     virtualenv --python=${PY} ${envdir}
     . ./${envdir}/bin/activate
 
-
     echo
     echo "========================================================================================================"
     echo Installing packages
     echo "========================================================================================================"
-    if [ -z ${TF_NIGHTLY} ]
-    then
-        TENSORFLOW=tensorflow${USE_GPU}==${TF_VERSION}
-    else
-        TENSORFLOW=tf-nightly${USE_GPU}
-    fi
+    TENSORFLOW=${TF}${USE_GPU}==${TF_VERSION}
 
     echo "========================================================================================================"
     if [ -z ${USE_GPU} ]

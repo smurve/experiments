@@ -50,3 +50,28 @@ def train(model, train_batcher, test_batcher, config, params):
 
         train_writer.close()
         test_writer.close()
+
+
+def train2(model, training_data, config, params):
+    with tf.Session(config=config) as sess:
+        i = 0
+        train_writer = tf.summary.FileWriter(os.path.join(params.log_dir, "train"), sess.graph)
+        test_writer = tf.summary.FileWriter(os.path.join(params.log_dir, "test"))
+        train_step = tf.train.AdamOptimizer(params.learning_rate).minimize(model.objective)
+        sess.run(tf.global_variables_initializer())
+
+        samples, labels = training_data
+        accuracy, summary = sess.run([model.accuracy, model.summary],
+                                     feed_dict={model.samples: samples, model.labels: labels})
+        test_writer.add_summary(summary, i)
+
+        _, summary = sess.run([train_step, model.summary],
+                              feed_dict={model.samples: samples, model.labels: labels})
+        train_writer.add_summary(summary, i)
+        i += 1
+
+        saver = tf.train.Saver()
+        saver.save(sess, params.model_file)
+
+        train_writer.close()
+        test_writer.close()

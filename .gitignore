@@ -2,11 +2,8 @@ __pycache__
 .idea 
 venv
 static
-capsnet-fashion.iml
+*.iml
 .ipynb_checkpoints
 .cache
-/test/
-/train/
 src/app/images/
-/tf15/
 *.pyc
