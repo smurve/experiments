@@ -25,62 +25,14 @@ import tensorflow as tf
 import dataset
 from conv2_dense2_dropout import Model
 from helpers.gpu_utils import validate_batch_size_for_multi_gpu
-
-
-def model_fn(features, labels, mode, params):
-    """The model_fn argument for creating an Estimator."""
-    model = Model(params['data_format'])
-    image = features
-    if isinstance(image, dict):
-        image = features['image']
-
-    if mode == tf.estimator.ModeKeys.PREDICT:
-        logits = model(image, training=False)
-        predictions = {
-            'classes': tf.argmax(logits, axis=1),
-            'probabilities': tf.nn.softmax(logits),
-        }
-        return tf.estimator.EstimatorSpec(
-            mode=tf.estimator.ModeKeys.PREDICT,
-            predictions=predictions,
-            export_outputs={
-                'classify': tf.estimator.export.PredictOutput(predictions)
-            })
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.AdamOptimizer(learning_rate=1e-4)
-
-        # If we are running multi-GPU, we need to wrap the optimizer.
-        if params.get('multi_gpu'):
-            optimizer = tf.contrib.estimator.TowerOptimizer(optimizer)
-
-        logits = model(image, training=True)
-        loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-        accuracy = tf.metrics.accuracy(
-            labels=labels, predictions=tf.argmax(logits, axis=1))
-        # Name the accuracy tensor 'train_accuracy' to demonstrate the
-        # LoggingTensorHook.
-        tf.identity(accuracy[1], name='train_accuracy')
-        tf.summary.scalar('train_accuracy', accuracy[1])
-        return tf.estimator.EstimatorSpec(
-            mode=tf.estimator.ModeKeys.TRAIN,
-            loss=loss,
-            train_op=optimizer.minimize(loss, tf.train.get_or_create_global_step()))
-    if mode == tf.estimator.ModeKeys.EVAL:
-        logits = model(image, training=False)
-        loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-        return tf.estimator.EstimatorSpec(
-            mode=tf.estimator.ModeKeys.EVAL,
-            loss=loss,
-            eval_metric_ops={
-                'accuracy':
-                    tf.metrics.accuracy(
-                        labels=labels,
-                        predictions=tf.argmax(logits, axis=1)),
-            })
+from helpers.softmax_cross_entropy_trainer import create_model_fn
 
 
 def main(_):
-    model_function = model_fn
+    def model_factory(params):
+        return Model(params['data_format'])
+
+    model_function = create_model_fn(model_factory, tf.train.AdamOptimizer(learning_rate=1e-4))
 
     if FLAGS.multi_gpu:
         validate_batch_size_for_multi_gpu(FLAGS.batch_size)
@@ -89,7 +41,7 @@ def main(_):
         # and (2) wrap the optimizer. The first happens here, and (2) happens
         # in the model_fn itself when the optimizer is defined.
         model_function = tf.contrib.estimator.replicate_model_fn(
-            model_fn, loss_reduction=tf.losses.Reduction.MEAN)
+            model_function, loss_reduction=tf.losses.Reduction.MEAN)
 
     data_format = FLAGS.data_format
     if data_format is None:
