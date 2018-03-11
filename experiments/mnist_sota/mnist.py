@@ -23,14 +23,15 @@ import sys
 import tensorflow as tf
 
 import dataset
-from conv2_dense2_dropout import Model
+from models.conv2_dense2_dropout import Model
+# from models.dense3 import Model
 from helpers.gpu_utils import validate_batch_size_for_multi_gpu
 from helpers.softmax_cross_entropy_trainer import create_model_fn
 
 
 def main(_):
     def model_factory(params):
-        return Model(params['data_format'])
+        return Model(params)
 
     model_function = create_model_fn(model_factory, tf.train.AdamOptimizer(learning_rate=1e-4))
 

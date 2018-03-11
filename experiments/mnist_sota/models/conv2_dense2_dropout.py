@@ -12,16 +12,17 @@ class Model:
     But written as a tf.keras.Model using the tf.layers API.
     """
 
-    def __init__(self, data_format):
+    def __init__(self, params):
         """Creates a model for classifying a hand-written digit.
 
         Args:
-          data_format: Either 'channels_first' or 'channels_last'.
+          params: Parameter dictionary. Must contain data_format: Either 'channels_first' or 'channels_last'.
             'channels_first' is typically faster on GPUs while 'channels_last' is
             typically faster on CPUs. See
             https://www.tensorflow.org/performance/performance_guide#data_formats
         """
 
+        data_format = params['data_format']
         if data_format == 'channels_first':
             self._input_shape = [-1, 1, 28, 28]
         else:
