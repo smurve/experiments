@@ -23,17 +23,16 @@ import sys
 import tensorflow as tf
 
 import dataset
-from models.conv2_dense2_dropout import Model
-# from models.dense3 import Model
+# from models.conv2_dense2_dropout import Model
+from models.dense3 import Model
+
 from helpers.gpu_utils import validate_batch_size_for_multi_gpu
 from helpers.softmax_cross_entropy_trainer import create_model_fn
 
 
 def main(_):
-    def model_factory(params):
-        return Model(params)
 
-    model_function = create_model_fn(model_factory, tf.train.AdamOptimizer(learning_rate=1e-4))
+    model_function = create_model_fn(lambda params: Model(params), tf.train.AdamOptimizer(learning_rate=1e-4))
 
     if FLAGS.multi_gpu:
         validate_batch_size_for_multi_gpu(FLAGS.batch_size)
@@ -62,7 +61,7 @@ def main(_):
         # When choosing shuffle buffer sizes, larger sizes result in better
         # randomness, while smaller sizes use less memory. MNIST is a small
         # enough dataset that we can easily shuffle the full epoch.
-        ds = dataset.train(FLAGS.data_dir)
+        ds = dataset.training_dataset(FLAGS.data_dir)
         ds = ds.cache().shuffle(buffer_size=50000).batch(FLAGS.batch_size).repeat(
             FLAGS.train_epochs)
         return ds
@@ -75,7 +74,7 @@ def main(_):
 
     # Evaluate the model and print results
     def eval_input_fn():
-        return dataset.test(FLAGS.data_dir).batch(
+        return dataset.test_dataset(FLAGS.data_dir).batch(
             FLAGS.batch_size).make_one_shot_iterator().get_next()
 
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
@@ -107,7 +106,7 @@ class MNISTArgParser(argparse.ArgumentParser):
         self.add_argument(
             '--data_dir',
             type=str,
-            default='/tmp/mnist_data',
+            default='/var/ellie/data/mnist_fashion',
             help='Path to directory containing the MNIST dataset')
         self.add_argument(
             '--model_dir',

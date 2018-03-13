@@ -105,12 +105,12 @@ def dataset(directory, images_file, labels_file):
     return tf.data.Dataset.zip((images, labels))
 
 
-def train(directory):
+def training_dataset(directory):
     """tf.data.Dataset object for MNIST training data."""
     return dataset(directory, 'train-images-idx3-ubyte',
                    'train-labels-idx1-ubyte')
 
 
-def test(directory):
+def test_dataset(directory):
     """tf.data.Dataset object for MNIST test data."""
     return dataset(directory, 't10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte')
