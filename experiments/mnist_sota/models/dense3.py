@@ -4,17 +4,14 @@ import tensorflow as tf
 class Model:
     """Model to recognize digits in the MNIST dataset.
 
-        Super-Naive 3-layer feed forward network
+        Naive 3-layer feed forward network
     """
 
+    # noinspection PyUnusedLocal
     def __init__(self, params):
-        """Creates a model for classifying a hand-written digit.
-
+        """Constructor
         Args:
-          params: Parameter dictionary. Must contain data_format: Either 'channels_first' or 'channels_last'.
-            'channels_first' is typically faster on GPUs while 'channels_last' is
-            typically faster on CPUs. See
-            https://www.tensorflow.org/performance/performance_guide#data_formats
+            params: not used here
         """
 
         self._input_shape = [-1, 784]

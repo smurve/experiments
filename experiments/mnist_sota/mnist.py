@@ -1,22 +1,3 @@
-#  Copyright 2017 The TensorFlow Authors. All Rights Reserved.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-"""Convolutional Neural Network Estimator for MNIST, built with tf.layers."""
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import sys
 
@@ -40,6 +21,7 @@ def main(_):
         # There are two steps required if using multi-GPU: (1) wrap the model_fn,
         # and (2) wrap the optimizer. The first happens here, and (2) happens
         # in the model_fn itself when the optimizer is defined.
+        # noinspection PyUnresolvedReferences
         model_function = tf.contrib.estimator.replicate_model_fn(
             model_function, loss_reduction=tf.losses.Reduction.MEAN)
 
@@ -62,8 +44,9 @@ def main(_):
         # randomness, while smaller sizes use less memory. MNIST is a small
         # enough dataset that we can easily shuffle the full epoch.
         ds = dataset.training_dataset(FLAGS.data_dir)
-        ds = ds.cache().shuffle(buffer_size=50000).batch(FLAGS.batch_size).repeat(
-            FLAGS.train_epochs)
+        ds = ds.cache().shuffle(buffer_size=50000).\
+            batch(FLAGS.batch_size).\
+            repeat(FLAGS.train_epochs)
         return ds
 
     # Set up training hook that logs the training accuracy every 100 steps.

@@ -1,0 +1,8 @@
+batch_size,data_dir,model_dir,multi_gpu,train_epochs,user,timestamp,localtime
+128,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525009838.326773,Sun Apr 29 15:50:38 2018
+128,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525009838.326773,Sun Apr 29 15:50:38 2018
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,5,wgiersche,1525011888.288942,Sun Apr 29 16:24:48 2018
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525012383.890221,Sun Apr 29 16:33:03 2018
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525017042.825849,Sun Apr 29 17:50:42 2018
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525017042.825849,Sun Apr 29 17:50:42 2018
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525017946.512927,Sun Apr 29 18:05:46 2018

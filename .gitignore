@@ -3,7 +3,9 @@ __pycache__
 venv
 static
 *.iml
+*.slides.html
 .ipynb_checkpoints
 .cache
 src/app/images/
 *.pyc
+/experiments/mnist_sota/tf17/

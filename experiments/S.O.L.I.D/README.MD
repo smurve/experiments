@@ -1,10 +1,18 @@
-## Principles and Patterns for ML geeks
+## Principles and Patterns for ML Practitioners
 
 ##### By Wolfgang Giersche, Zühlke Engineering AG
 
-#### S.O.L.I.D principles applied to Tensorflow programming
+#### S.O.L.I.D (and more) principles applied to Tensorflow programming
 
-##### I am using the most current TF API 1.6.0 rc1 with the following building blocks:
+##### I am using the most current TF API 1.8.0 with the following building blocks:
+
+
+The content here is heavily inspired by the 
+[github tensorflow repo](https://github.com/tensorflow/models/tree/master/official/mnist) - 
+indeed initially copied, and then significantly refactored to demonstrate how SWE patterns and principles 
+make the code more readable, testable and reusable.
+
+
 
 - [Tensorflow Dataset API](https://www.tensorflow.org/programmers_guide/datasets)
     - Allows for pre-processing with a monadic API (map, flatmap, etc)
@@ -29,7 +37,9 @@ are commonly attributed to [Robert C. Martin (Uncle Bob)](https://de.wikipedia.o
 ![Anatomy of an ML epic](Anatomy-of-an-experiment.png)
 
 Exactly because data analytics and machine learning have rather exploratory traits, 
-practices better support changes without endangering the quality of the code.
+practices should better support code and config changes without endangering 
+the quality of the code.
+
 
 
 
@@ -41,16 +51,9 @@ Supplemental material:
 - The concept of a computational graph -> tf.InteractiveSession() to the rescue
 - Neural networks: concepts
 
-More non-academic resources:
+Popular web resources:
 - [Michael Nielson's blog](http://neuralnetworksanddeeplearning.com/)
-- [Chris Olah's blog](http://colah.github.io/)
-- [Olah on topology](http://colah.github.io/posts/2014-03-NN-Manifolds-Topology/)
 - [A quest for true understanding: Distill.pub](https://distill.pub/)
-
-More academic:
 - [Goodfellow's Deep Learning Book](http://www.deeplearningbook.org/)
 
 
-Later on request
-
-- A (not quite) naive glimpse on the current understanding of neural networks
