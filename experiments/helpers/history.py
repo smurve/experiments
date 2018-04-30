@@ -7,15 +7,19 @@ import os
 import time
 import copy
 
+HIST_FILE_NAME = 'experiment_history.csv'
+
 
 class ExpHistory:
-    def __init__(self):
-        self.experiments = pd.read_csv('experiment_history.csv')
+
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.experiments = pd.read_csv(file_name)
         self.user = os.environ['USER']
 
     def report_experiment(self, params):
         self.experiments = self.experiments.append(params, ignore_index=True)
-        self.experiments.to_csv('experiment_history.csv', index=False)
+        self.experiments.to_csv(self.file_name, index=False)
 
     def copy_from_record(self, index):
         now = time.time()
@@ -27,4 +31,4 @@ class ExpHistory:
         return new_copy
 
 
-history = ExpHistory()
+history = ExpHistory(HIST_FILE_NAME)
