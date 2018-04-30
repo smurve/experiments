@@ -15,8 +15,8 @@ class ExpHistory:
     def __init__(self, file_name):
         self.file_name = file_name
         self.experiments = pd.read_csv(file_name)
-        self.user = os.environ['USER']
-
+        self.user = os.environ.get('USER', os.environ.get('USERNAME', 'anonymous'))
+        
     def report_experiment(self, params):
         self.experiments = self.experiments.append(params, ignore_index=True)
         self.experiments.to_csv(self.file_name, index=False)
