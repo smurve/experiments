@@ -13,3 +13,5 @@ wolfgangs-mac-pro.home,Darwin-15.6.0-x86_64-i386-64bit,x86_64,0,0,256,/var/ellie
 wolfgangs-mac-pro.home,Darwin-15.6.0-x86_64-i386-64bit,x86_64,0,0,256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,4,wgiersche,1525170216,Tue May  1 12:23:36 2018,0.8794000148773193,2820.0,13.0
 wolfgangs-mac-pro.home,Darwin-15.6.0-x86_64-i386-64bit,x86_64,0,0,256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,4,wgiersche,1525171715,Tue May  1 12:48:35 2018,0.8755999803543091,940.0,12.0
 wolfgangs-mac-pro.home,Darwin-15.6.0-x86_64-i386-64bit,x86_64,0,0,256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,4,wgiersche,1525171715,Tue May  1 12:48:35 2018,0.8859999775886536,1880.0,12.0
+scylla,Linux-4.13.0-39-generic-x86_64-with-Ubuntu-16.04-xenial,x86_64,1,0,256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,4,wgiersche,1525172006,Tue May  1 12:53:26 2018,0.8761000037193298,940.0,13.0
+scylla,Linux-4.13.0-39-generic-x86_64-with-Ubuntu-16.04-xenial,x86_64,1,0,256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,4,wgiersche,1525172006,Tue May  1 12:53:26 2018,0.8841000199317932,1880.0,4.0
