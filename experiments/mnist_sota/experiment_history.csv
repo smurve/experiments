@@ -14,3 +14,4 @@ batch_size,data_dir,model_dir,multi_gpu,train_epochs,user,timestamp,localtime,ac
 256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,4,wgiersche,1525103322.7470489,Mon Apr 30 17:48:42 2018,0.8754000067710876,1880.0
 256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,4,wgiersche,1525148229.653155,Tue May  1 06:17:09 2018,0.8765000104904175,940.0
 256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,4,wgiersche,1525149395.536633,Tue May  1 06:36:35 2018,0.8801000118255615,940.0
+256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,1,40,wgiersche,1525158714.879608,Tue May  1 09:11:54 2018,0.8917999863624573,9400.0

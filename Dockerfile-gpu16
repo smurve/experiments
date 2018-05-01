@@ -1,0 +1,10 @@
+FROM tensorflow/tensorflow:1.5.0-gpu-py3
+MAINTAINER Wolfgang Giersche
+# WORKDIR /usr/local/cuda/targets/x86_64-linux/lib/stubs
+# RUN ln -s libcuda.so libcuda.so.1
+ENV LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/stubs:$LD_LIBRARY_PATH
+WORKDIR /
+ADD src /src
+WORKDIR /src/
+CMD python3 mnist_trainer.py
+
