@@ -26,6 +26,7 @@ import tensorflow as tf
 from six.moves import urllib
 
 
+# noinspection PyUnresolvedReferences
 def read32(bytestream):
     """Read 4 bytes from bytestream as an unsigned 32-bit integer."""
     dt = np.dtype(np.uint32).newbyteorder('>')
@@ -60,7 +61,7 @@ def check_labels_file_header(filename):
                                                                            f.name))
 
 
-def download(directory, filename):
+def download(directory, kind, filename):
     """Download (and unzip) a file from the MNIST dataset if not already done."""
     filepath = os.path.join(directory, filename)
     if tf.gfile.Exists(filepath):
@@ -68,7 +69,7 @@ def download(directory, filename):
     if not tf.gfile.Exists(directory):
         tf.gfile.MakeDirs(directory)
     # CVDF mirror of http://yann.lecun.com/exdb/mnist/
-    url = 'https://storage.googleapis.com/cvdf-datasets/mnist/' + filename + '.gz'
+    url = base_url(kind) + filename + '.gz'
     zipped_filepath = filepath + '.gz'
     print('Downloading %s to %s' % (url, zipped_filepath))
     # noinspection PyUnresolvedReferences
@@ -79,9 +80,9 @@ def download(directory, filename):
     return filepath
 
 
-def dataset(directory, images_file, labels_file):
-    images_file = download(directory, images_file)
-    labels_file = download(directory, labels_file)
+def dataset(directory, kind, images_file, labels_file):
+    images_file = download(directory, kind, images_file)
+    labels_file = download(directory, kind, labels_file)
 
     check_image_file_header(images_file)
     check_labels_file_header(labels_file)
@@ -105,12 +106,21 @@ def dataset(directory, images_file, labels_file):
     return tf.data.Dataset.zip((images, labels))
 
 
-def training_dataset(directory):
+def training_dataset(directory, kind='DIGITS'):
     """tf.data.Dataset object for MNIST training data."""
-    return dataset(directory, 'train-images-idx3-ubyte',
+    return dataset(directory, kind, 'train-images-idx3-ubyte',
                    'train-labels-idx1-ubyte')
 
 
-def test_dataset(directory):
+def test_dataset(directory, kind='DIGITS'):
     """tf.data.Dataset object for MNIST test data."""
-    return dataset(directory, 't10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte')
+    return dataset(directory, kind, 't10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte')
+
+
+def base_url(kind):
+    if kind == 'FASHION':
+        return 'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/'
+    elif kind == 'DIGITS':
+        return 'https://storage.googleapis.com/cvdf-datasets/mnist/'
+    else:
+        raise ValueError("Unknown kind of input data: %s, expecting either 'FASHION' or 'DIGITS'")

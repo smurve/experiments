@@ -2,7 +2,7 @@ import tensorflow as tf
 from helpers.gpu_utils import validate_batch_size_for_multi_gpu
 
 
-def create_model_fn(model_factory, optimizer, options, dict_key=None):
+def create_model_fn(model_factory, optimizer, loss_function, options, dict_key=None):
     """
     Create the model_fn to hand to the Estimator
     :param model_factory: A function that takes the model_fn params to create the model tensor
@@ -57,7 +57,8 @@ def create_model_fn(model_factory, optimizer, options, dict_key=None):
                 tf.contrib.estimator.TowerOptimizer(optimizer)
 
             logits = model(input_tensor, training=True)
-            loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+            #loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+            loss = loss_function(labels=labels, logits=logits)
             accuracy = tf.metrics.accuracy(
                 labels=labels, predictions=tf.argmax(logits, axis=1))
             # Name the accuracy tensor 'train_accuracy' to demonstrate the
