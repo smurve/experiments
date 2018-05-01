@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from helpers.gpu_utils import validate_batch_size_for_multi_gpu
 
 
@@ -6,14 +7,16 @@ def create_model_fn(model_factory, optimizer, loss_function, options, dict_key=N
     """
     Create the model_fn to hand to the Estimator
     :param model_factory: A function that takes the model_fn params to create the model tensor
-    :param dict_key: optional key to lookup the input tensor if 'features' is a dictionary
-    :param options: an object specifying batch_size and multi_gpu usage
     :param optimizer: the optimizer to use for training, ignored if not running in training mode
+    :param loss_function: The objective function to minimize
+    :param options: an object specifying batch_size and multi_gpu usage
+    :param dict_key: optional key to lookup the input tensor if 'features' is a dictionary
     :return:
     """
 
     def _model_fn(features, labels, mode, params):
         """The model_fn argument for creating an Estimator.
+        Model functions are like factories for EstimatorSpecs
 
         :param features: the features, either input tensor or dictionary, if dictionary, dict_key is looked up.
         :param labels: the true labels
@@ -53,11 +56,12 @@ def create_model_fn(model_factory, optimizer, loss_function, options, dict_key=N
         if mode == tf.estimator.ModeKeys.TRAIN:
 
             # If we are running multi-GPU, we need to wrap the optimizer.
+            # noinspection PyUnresolvedReferences
             the_optimizer = optimizer if not options.multi_gpu else \
                 tf.contrib.estimator.TowerOptimizer(optimizer)
 
             logits = model(input_tensor, training=True)
-            #loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+            # loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
             loss = loss_function(labels=labels, logits=logits)
             accuracy = tf.metrics.accuracy(
                 labels=labels, predictions=tf.argmax(logits, axis=1))
@@ -91,7 +95,22 @@ def create_model_fn(model_factory, optimizer, loss_function, options, dict_key=N
     ######################################################################
     #      If multi-gpu, wrap into map-reduce replicator
     ######################################################################
+    # noinspection PyUnresolvedReferences
     return _model_fn if not options.multi_gpu else tf.contrib.estimator.replicate_model_fn(
         _model_fn, loss_reduction=tf.losses.Reduction.MEAN)
 
 
+def split_datasource(ds, num_records, ratio):
+    """
+    :param ds: the dataset to be split
+    :param num_records: the number of records in the dataset
+    :param ratio: the ratio of records in the first part
+    :return a pair of datasources together equivalent to the original datasource
+    """
+    # noinspection PyUnresolvedReferences
+    idx = np.array(range(num_records))
+    idx_ds = tf.data.Dataset.from_tensor_slices(tf.constant(idx))
+    ds_i = tf.data.Dataset.zip((ds, idx_ds))
+    ds1 = ds_i.filter(lambda x, y: y < int(num_records * ratio)).map(lambda x, y: x)
+    ds2 = ds_i.filter(lambda x, y: y >= int(num_records * ratio)).map(lambda x, y: x)
+    return ds1, ds2
