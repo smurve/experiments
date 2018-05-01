@@ -30,14 +30,14 @@ class ExpHistory:
         return new_copy
 
     def last_experiment_from_here(self):
-        rt=os_info()
+        rt = os_info()
         this_node = rt['node']
         h = self.experiments
         index = h[h['node'] == this_node].tail(1).index
-        if ( len(index) == 1 ):
+        if len(index) == 1:
             sugg_index = index[0]
         else:
-            sugg_index = history.experiments.shape[0] - 1
+            sugg_index = self.experiments.shape[0] - 1
 
         acopy = self.copy_from_record(sugg_index)
         acopy.os = rt['os']
