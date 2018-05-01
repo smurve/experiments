@@ -1,9 +1,16 @@
 batch_size,data_dir,model_dir,multi_gpu,train_epochs,user,timestamp,localtime,accuracy,steps
-128,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525009838.326773,Sun Apr 29 15:50:38 2018,,
-128,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525009838.326773,Sun Apr 29 15:50:38 2018,,
-64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,5,wgiersche,1525011888.288942,Sun Apr 29 16:24:48 2018,,
-64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525012383.890221,Sun Apr 29 16:33:03 2018,,
-64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525017042.825849,Sun Apr 29 17:50:42 2018,,
-64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525017042.825849,Sun Apr 29 17:50:42 2018,,
-64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,False,10,wgiersche,1525017946.512927,Sun Apr 29 18:05:46 2018,,
-256,/var/ellie/data/mnist_fashion,C:\tmp\mnist_model,False,6,wgi,1525088900.7981637,Mon Apr 30 13:48:20 2018,0.9800999760627747,1410.0
+128,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525009838.326773,Sun Apr 29 15:50:38 2018,,
+128,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525009838.326773,Sun Apr 29 15:50:38 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,5,wgiersche,1525011888.288942,Sun Apr 29 16:24:48 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525012383.890221,Sun Apr 29 16:33:03 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525017042.825849,Sun Apr 29 17:50:42 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525017042.825849,Sun Apr 29 17:50:42 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525017946.512927,Sun Apr 29 18:05:46 2018,,
+256,/var/ellie/data/mnist_fashion,C:\tmp\mnist_model,0,6,wgi,1525088900.7981634,Mon Apr 30 13:48:20 2018,0.9800999760627748,1410.0
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525102123.4487,Mon Apr 30 17:28:43 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525102123.4487,Mon Apr 30 17:28:43 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525102215.872392,Mon Apr 30 17:30:15 2018,,
+64,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,10,wgiersche,1525102326.104861,Mon Apr 30 17:32:06 2018,,
+256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,4,wgiersche,1525103322.7470489,Mon Apr 30 17:48:42 2018,0.8754000067710876,1880.0
+256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,4,wgiersche,1525148229.653155,Tue May  1 06:17:09 2018,0.8765000104904175,940.0
+256,/var/ellie/data/mnist_fashion,/tmp/mnist_model,0,4,wgiersche,1525149395.536633,Tue May  1 06:36:35 2018,0.8801000118255615,940.0
