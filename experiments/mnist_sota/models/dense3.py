@@ -6,6 +6,8 @@ class Model:
 
         Naive 3-layer feed forward network
     """
+    id = 'Dense3'
+
 
     # noinspection PyUnusedLocal
     def __init__(self, params, inp=784, hidden1=1024, hidden2=128, output=10):
@@ -20,6 +22,7 @@ class Model:
             output: dimension of the output layer
         """
 
+        
         self._input_shape = [-1, inp]
 
         self.fc1 = tf.layers.Dense(hidden1, activation=tf.nn.relu)

@@ -6,6 +6,8 @@ class Model:
     Model to recognize digits in the MNIST dataset.
     """
 
+    id = 'Conv2-Dense2'
+
     def __init__(self, params):
         """Creates a model for classifying a hand-written digit.
 
@@ -15,6 +17,7 @@ class Model:
             typically faster on CPUs. See
             https://www.tensorflow.org/performance/performance_guide#data_formats
         """
+
 
         data_format = params['data_format']
         if data_format == 'channels_first':
