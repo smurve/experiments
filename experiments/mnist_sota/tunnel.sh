@@ -1,0 +1,1 @@
+ssh -N -L 8889:localhost:8888 wgiersche@$1
